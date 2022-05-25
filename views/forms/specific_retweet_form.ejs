@@ -1,0 +1,22 @@
+<div class="row col-6 mx-auto p-4 my-4" style="margin-top: 50px !important;">
+    <form style="width:100%;" class="text-center" id="new_listener">
+        <div class="form-group">
+            <label for="listener_bot">LISTENER BOT</label>
+            <select id="listener_bot" name="listener_bot" class="form-control text-center"><%- locals.bots %></select>
+        </div>
+        <div class="form-group">
+            <label for="from_name">AUTHOR NAME</label>
+            <input type="text" name="from_name" id="from_name" class="form-control text-center" placeholder="Enter Author Name">
+        </div>
+        <div class="form-group">
+            <label for="author_id">AUTHOR ID</label>
+            <input type="text" name="author_id" id="author_id" class="form-control text-center" placeholder="Enter Author Id">
+        </div>
+        <div class="form-group">
+            <label for="nkyw">KEY WORD</label>
+            <input type="text" name="nkyw" id="nkyw" class="form-control text-center" placeholder="Enter Key Word">
+        </div>
+        <div style="text-align:center !important;" id="new_listener_res"></div>
+        <button type="submit" class="btn btn-primary mx-auto">SUBMIT</button>
+    </form>
+</div>

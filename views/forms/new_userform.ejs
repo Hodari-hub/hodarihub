@@ -1,0 +1,42 @@
+<div class="row col-6 mx-auto p-4 my-4" style="margin-top: 50px !important;">
+    <form style="width:100%;" class="text-center" id="edit_user">
+        <div class="form-group">
+            <label for="fname">Full Name</label>
+            <input type="text" name="fname" id="fname" class="form-control text-center" aria-describedby="emailHelp" placeholder="Enter Full Name" required>
+        </div>
+        <div class="form-group">
+            <label for="uaddress">Email Address</label>
+            <input type="address" name="uaddress" id="uaddress" class="form-control text-center" aria-describedby="emailHelp" placeholder="Enter Email Address" required>
+        </div>
+        <div class="form-group">
+            <label for="phone1">Phone Number</label>
+            <input type="phonenumber" name="phone1" id="phone1" class="form-control text-center" aria-describedby="emailHelp" placeholder="Enter Phone Number" required>
+        </div>
+        <div class="form-group">
+            <label for="phone2">Phone Number 2</label>
+            <input type="phonenumber" name="phone2" id="phone2" class="form-control text-center" aria-describedby="emailHelp" placeholder="Enter Phone Number" required>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail1">User Type</label>
+            <select id="utype" name="utype" class="form-control text-center" required>
+                <option value="member" selected>Member</option>
+                <option value="operator">Operator</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" name="location" id="location" class="form-control text-center" aria-describedby="emailHelp" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" class="form-control text-center" id="exampleInputPassword1" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <label for="description">Any Description</label>
+            <textarea class="form-control text-center" name="description" id="description" rows="3" placeholder="Any Description"></textarea>
+        </div>
+        <div style="text-align:center !important;" id="newuser_res"></div>
+        <button type="submit" class="btn btn-primary mx-auto">ADD MEMBER</button>
+    </form>
+</div>

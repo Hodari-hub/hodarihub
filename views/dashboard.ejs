@@ -1,0 +1,21 @@
+<%- include("./partials/headers.ejs"); %>
+  <div class="wrapper">
+    <%- include("./partials/topbar.ejs"); %>
+    <%- include("./partials/sideMenu.ejs"); %>
+    <!-- Main content div -->
+    <div class="content-wrapper">
+        <div class="row m-0">
+          <div class="col">
+            <div class='py-4 row container-fluid m-auto'>
+              <%- locals.member_list %>
+            </div>
+          </div>
+        </div>
+        <div class="row m-0 text-center">
+          <a class="mx-auto" href="/member"><button class="btn btn-success" style="background:#17a2b8;">ADD MEMBER</button></a>
+        </div>
+    </div>
+    <!-- middle footer -->
+    <%- include("./partials/middle_footer.ejs"); %>
+  </div>
+<%- include("./partials/footer.ejs"); %>

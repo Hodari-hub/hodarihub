@@ -1,0 +1,32 @@
+<%- include("./partials/headers.ejs"); %>
+  <div class="wrapper">
+    <%- include("./partials/topbar.ejs"); %>
+    <%- include("./partials/sideMenu.ejs"); %>
+    <!-- Main content div -->
+    <div class="content-wrapper">
+        <div class="my-4"><br>
+          <% if(locals.form=="newuserform"){%>
+            <%- include("./forms/new_userform.ejs"); %>
+          <%} else if(locals.form=="newbot"){%>
+            <%- include("./forms/new_bot.ejs"); %>
+          <%} else if(locals.form=="edituser"){%>
+            <%- include("./forms/edit_member.ejs"); %>
+          <%} else if(locals.form=="newemail"){%>
+            <%- include("./forms/emailsform.ejs"); %>
+          <%} else if(locals.form=="editbot"){%>
+            <%- include("./forms/edit_bot.ejs"); %>
+          <%} else if(locals.form=="editemail"){%>
+            <%- include("./forms/edit_email.ejs"); %>
+          <%} else if(locals.form=="bystander"){%>
+            <%- include("./forms/bystander_form.ejs"); %>
+          <%} else if(locals.form=="newkeyword"){%>
+            <%- include("./forms/newkeyword_form.ejs"); %>
+          <%} else if(locals.form=="listener"){%>
+            <%- include("./forms/specific_retweet_form.ejs"); %>
+          <%}%>
+        </div>
+    </div>
+    <!-- middle footer -->
+    <%- include("./partials/middle_footer.ejs"); %>
+  </div>
+<%- include("./partials/footer.ejs"); %>

@@ -1,0 +1,62 @@
+<%- include("./partials/headers.ejs"); %>
+    <div class="wrapper">
+        <%- include("./partials/topbar.ejs"); %>
+        <%- include("./partials/sideMenu.ejs"); %>
+        <!-- Main content div -->
+        <div class="content-wrapper">
+            <div class="row m-0">
+                <div class="col">
+                    <div class='py-4 row container-fluid m-auto'>
+                        <div class="col-md-5 m-auto">
+                            <div>
+                                <a href="/edit_user/<%- locals.userid %>" class="btn btn-info">EDIT</a>
+                                <button id="delete_user" data-userid="<%- locals.userid %>" class="btn btn-danger">DELETE</button>
+                            </div><br>
+                            <!-- Widget: user widget style 2 -->
+                            <div class="card card-widget widget-user-2">
+                              <!-- Add the bg color to the header using any of the bg-* classes -->
+                              <div class="widget-user-header bg-warning">
+                                <div class="widget-user-image">
+                                  <img class="img-circle elevation-2" src="<%- locals.m_pic %>" alt="User Profile">
+                                </div>
+                                <!-- /.widget-user-image -->
+                                <h3 class="widget-user-username"><%- locals.m_name %></h3>
+                                <h5 class="widget-user-desc"><%- locals.m_type %></h5>
+                              </div>
+                              <div class="card-footer p-0">
+                                <ul class="nav flex-column">
+                                  <li class="nav-item p-3"> Home Address:&nbsp; <%- locals.user_location %></li>
+                                  <li class="nav-item p-3"> Phone Number:&nbsp; <%- locals.m_phone_number %></li>
+                                  <li class="nav-item p-3"> Phone Number:&nbsp; <%- locals.m_sec_number %></li>
+                                  <li class="nav-item p-3"> Email Address:&nbsp; <%- locals.m_email %></li>
+                                </ul>
+                                <p class="p-3"><%- locals.m_description %></p>
+                              </div>
+                            </div>
+                            <!-- /.widget-user -->
+
+                            <div class="card">
+                                <div class="card-header border-transparent">
+                                    <h3 class="card-title">ALL BOTS</h3>
+                                    <div class="card-tools"><a href="/media"><button type="button" class="btn btn-tool"><i class="fas fa-plus"></i></button></a></div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table m-0">
+                                            <thead><tr><th>ID</th><th>BOTS NAME</th><th>PASSWORD</th><th>EMAIL</th><th>NUMBER</th></tr></thead>
+                                            <tbody>
+                                                <%- locals.bots %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- middle footer -->
+        <%- include("./partials/middle_footer.ejs"); %>
+    </div>
+<%- include("./partials/footer.ejs"); %>

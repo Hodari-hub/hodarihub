@@ -1,0 +1,41 @@
+<div class="row col-6 mx-auto p-4 my-4" style="margin-top: 50px !important;">
+    <form style="width:100%;" class="text-center" id="newmailbot">
+        <div class="form-group">
+            <label for="email_name">Full Name</label>
+            <input type="text" name="email_name" id="email_name" class="form-control text-center" aria-describedby="emailHelp" placeholder="Enter Name Used On Registration">
+        </div>
+        <div class="form-group">
+            <label for="emailtype">Email Type</label>
+            <select id="emailtype" name="emailtype" class="form-control text-center">
+                <option value="gmail" selected>Gmail</option>
+                <option value="yahoo">Yahoo Mail</option>
+                <option value="webmail">Webmail</option>
+                <option value="others">Others</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="owner_id">Email Owner</label>
+            <select id="owner_id" name="owner_id" class="form-control text-center">
+                <%- locals.usersoption %>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="email_address">Email Address</label>
+            <input type="email" name="email_address" id="email_address" class="form-control text-center" aria-describedby="emailHelp" placeholder="Email Address">
+        </div>
+        <div class="form-group">
+            <label for="primary_address">Primary Email</label>
+            <input type="email" name="primary_address" id="primary_address" class="form-control text-center" aria-describedby="emailHelp" placeholder="if any (option) ">
+        </div>
+        <div class="form-group">
+            <label for="email_phone">Phone Number</label>
+            <input type="tel" name="email_phone" id="email_phone" class="form-control text-center" aria-describedby="emailHelp" placeholder="Number Used on registration">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" class="form-control text-center" placeholder="Password">
+        </div>
+        <div style="text-align:center !important;" id="email_res"></div>
+        <button type="submit" class="btn btn-primary mx-auto">ADD EMAIL</button>
+    </form>
+</div>

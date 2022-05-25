@@ -1,0 +1,42 @@
+<div class="row col-6 mx-auto p-4 my-4" style="margin-top: 50px !important;">
+    <form style="width:100%;" class="text-center" id="editEmail">
+        <input type="hidden" id="mail_id" name="mail_id" value="<%- locals.mail_id %>">
+        <div class="form-group">
+            <label for="email_name">Full Name</label>
+            <input type="text" name="email_name" id="email_name" class="form-control text-center" placeholder="Enter Name Used On Registration" value="<%- locals.f_name %>">
+        </div>
+        <div class="form-group">
+            <label for="emailtype">Email Type</label>
+            <select id="emailtype" name="emailtype" class="form-control text-center">
+                <option value="gmail" <% if(locals.mailtype=="gmail"){%> selected <%}%>>Gmail</option>
+                <option value="yahoo" <% if(locals.mailtype=="yahoo"){%> selected <%}%>>Yahoo Mail</option>
+                <option value="webmail" <% if(locals.mailtype=="webmail"){%> selected <%}%>>Webmail</option>
+                <option value="others" <% if(locals.mailtype=="others"){%> selected <%}%>>Others</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="owner_id">Email Owner</label>
+            <select id="owner_id" name="owner_id" class="form-control text-center">
+                <%- locals.memberlist %>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="email_address">Email Address</label>
+            <input type="email" name="email_address" id="email_address" class="form-control text-center" placeholder="Email Address" value="<%- locals.mail_address %>">
+        </div>
+        <div class="form-group">
+            <label for="primary_address">Primary Email</label>
+            <input type="email" name="primary_address" id="primary_address" class="form-control text-center" placeholder="if any (option)" value="<%- locals.primary_address %>">
+        </div>
+        <div class="form-group">
+            <label for="email_phone">Phone Number</label>
+            <input type="tel" name="email_phone" id="email_phone" class="form-control text-center" placeholder="Number Used on registration" value="<%- locals.mail_phone %>">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" name="password" id="password" class="form-control text-center" placeholder="Password" value="<%- locals.password %>">
+        </div>
+        <div style="text-align:center !important;" id="email_res"></div>
+        <button type="submit" class="btn btn-primary mx-auto">SUBMIT CHANGES</button>
+    </form>
+</div>

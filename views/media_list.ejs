@@ -1,0 +1,29 @@
+<%- include("./partials/headers.ejs"); %>
+  <div class="wrapper">
+    <%- include("./partials/topbar.ejs"); %>
+    <%- include("./partials/sideMenu.ejs"); %>
+    <!-- Main content div -->
+    <div class='content-wrapper'>
+        <div class='container m-auto py-3'>
+            <div class="card">
+                <div class="card-header border-transparent">
+                    <h3 class="card-title"><%- locals.medianame %> BOTS</h3>
+                    <div class="card-tools">
+                        <a href="/media"><button type="button" class="btn btn-tool"><i class="fas fa-plus"></i></button></a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table m-0">
+                            <thead><tr><th>ID</th><th>MEDIA</th><th>NAME</th><th>PASSWORD</th><th>EMAIL</th><th>NUMBER </th><th>OWNER</th><th>ACTION</th></tr></thead>
+                            <tbody><%- locals.bots %></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- middle footer -->
+    <%- include("./partials/middle_footer.ejs"); %>
+  </div>
+<%- include("./partials/footer.ejs"); %>

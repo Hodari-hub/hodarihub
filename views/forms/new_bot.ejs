@@ -1,0 +1,63 @@
+<div class="row col-6 mx-auto p-4 my-4" style="margin-top: 50px !important;">
+    <form style="width:100%;" class="text-center" id="newbotform">
+        <!-- <h1 class="text-center">ADD BASE MEMBER</h1><br> -->
+        <div class="form-group">
+            <label for="bots_name">Bot Name</label>
+            <input type="text" name="bots_name" id="bots_name" class="form-control text-center" aria-describedby="emailHelp" placeholder="Enter Bot Name">
+        </div>
+        <div class="form-group">
+            <label for="medianame">Media Name</label>
+            <select id="medianame" name="medianame" class="form-control text-center">
+                <option value="facebook" selected>Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="jamiiforums">Jamii Forums</option>
+                <option value="twitter">Twitter</option>
+                <option value="youtube">You Tube</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="owner_id">Owner Name</label>
+            <select id="owner_id" name="owner_id" class="form-control text-center">
+                <%- locals.usersoption %>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="media_address">Email Address</label>
+            <input type="email" name="media_address" id="media_address" class="form-control text-center" aria-describedby="emailHelp" placeholder="Email used to register Bot">
+        </div>
+        <div class="form-group">
+            <label for="bots_phone">Phone Number</label>
+            <input type="tel" name="bots_phone" id="bots_phone" class="form-control text-center" aria-describedby="emailHelp" placeholder="Bot Phone Number">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" name="password" id="password" class="form-control text-center" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <label for="api_key">API Key</label>
+            <input type="text" name="api_key" id="api_key" class="form-control text-center"  placeholder="API Key">
+        </div>
+        <div class="form-group">
+            <label for="apisecret">API Secrete</label>
+            <input type="text" name="apisecret" id="apisecret" class="form-control text-center" placeholder="API Secrete">
+        </div>
+        <div class="form-group">
+            <label for="access_token">Access Token</label>
+            <input type="text" name="access_token" id="access_token" class="form-control text-center"  placeholder="Access Token">
+        </div>
+        <div class="form-group">
+            <label for="access_secret">Access Token Secret</label>
+            <input type="text" name="access_secret" id="access_secret" class="form-control text-center" placeholder="Access Token Secret">
+        </div>
+        <div class="form-group">
+            <label for="baretoken">Bare Token</label>
+            <input type="text" name="baretoken" id="baretoken" class="form-control text-center" placeholder="Enter Bare Token">
+        </div>
+        <div class="form-group">
+            <label for="description">Bot Profile</label>
+            <textarea class="form-control text-center" name="description" id="description" rows="3" placeholder="Any Description"></textarea>
+        </div>
+        <div style="text-align:center !important;" id="bot_res"></div>
+        <button type="submit" class="btn btn-primary mx-auto">ADD MEDIA</button>
+    </form>
+</div>

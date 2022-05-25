@@ -1,0 +1,157 @@
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="/dashboard" class="brand-link">
+      <img src="/static/images/letter-h.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light">HODARI HUB</span>
+    </a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <img src="/static/images/user.png" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+          <a href="/dashboard" class="d-block">
+            <%- locals.user_name %>
+          </a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
+
+          <!-- <li class="nav-item">
+            <a href="./members" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>Base Members</p>
+            </a>
+          </li> -->
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-briefcase"></i>
+              <p>Medias Accounts<i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/socialmedia" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>All Media</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/socialmedia/instagram" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Instagram</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/socialmedia/facebook" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Face Book</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/socialmedia/twitter" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Twitter</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/socialmedia/jamiiforums" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Jamii Forums</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/socialmedia/youtube" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>YouTube</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a href="/email_list" class="nav-link">
+              <i class="nav-icon fas fa-envelope"></i>
+              <p>Email Accounts</p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fa fa-cogs"></i>
+              <p>Twitter Bot <i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/bystanders" class="nav-link"><i class="far fa-circle nav-icon"></i> &nbsp; <p>General Retweet</p></a>
+              </li>
+              <li class="nav-item">
+                <a href="/tone_counter" class="nav-link"><i class="far fa-circle nav-icon"></i> &nbsp; <p>Tone Counter</p></a>
+              </li>
+              <li class="nav-item">
+                <a href="/fromspecific" class="nav-link"><i class="far fa-circle nav-icon"></i> &nbsp; <p>Retweet from specific</p></a>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-chart-line"></i>
+              <p>Tonality <i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i> <p>Data Table</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>CSV Data</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i> <p>Message Trend</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Social Media Groups</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Tonality Members</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>View Line Chart</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>View Pie Chart</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>

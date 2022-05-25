@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>HODARI HUB</title>
+        <link rel="stylesheet" type="text/css" href="static/css/login.css">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class="main">  	
+            <input type="checkbox" id="chk" aria-hidden="true">
+            <div class="signup">
+                <form  method="post" action="/login" id="loginform">
+                    <label for="chk" aria-hidden="true">HODARI HUB</label>
+                    <input type="email" name="m_email" id="m_email" placeholder="Email" required>
+                    <input type="password" name="m_pass" id="m_pass" placeholder="Password" required>
+                    <button type="submit" id="login">LOG IN</button>
+                    <div style="text-align:center;" id="login_res"></div>
+                </form>
+            </div>
+            <div class="login">
+                <form  method="post" action="/login">
+                    <label for="chk" aria-hidden="true">RESET</label>
+                    <input type="email" name="m_email_r" placeholder="Email" required="">
+                    <input type="phonenumber" name="m_phone_r" placeholder="Phone Number" required="">
+                    <button>CHANGE</button>
+                </form>
+            </div>
+        </div>
+        <!-- jQuery -->
+        <script src="./static/jquery/jquery.min.js"></script>
+        <script src="./static/js/login.js"></script>
+    </body>
+</html>
