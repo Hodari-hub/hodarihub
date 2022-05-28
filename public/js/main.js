@@ -293,3 +293,207 @@ $("body").on("click",".delete_keywords", function(){
         }
     });
 });
+
+
+$("body").on("click",".delete_media", function(){
+    let media_id=$(this).data("id");
+    let name=$(this).data("name");
+    Swal.fire({
+        title: 'Are you sure?',html: `You want to delete <strong>${name}</strong> from the page list`, icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Yes, delete!'
+    })
+    .then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type:"POST",url:"/delete_tone_media", data:{media_id:media_id},
+                success:function(rs){
+                    if(rs.code==1){
+                        $(`#tr_${media_id}`).fadeOut(1000); setTimeout(()=>{$(`#tr_${media_id}`).remove();},1200);
+                        Swal.fire('SUCCESS', `${rs.message}`,'success'); 
+                    }
+                    else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+                }
+            });
+        }
+    });
+});
+
+$("body").on("click",".delete_msg", function(){
+    let media_id=$(this).data("id");
+    Swal.fire({
+        title: 'Are you sure?',html: `You want to delete this data from the list`, icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Yes, delete!'
+    })
+    .then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type:"POST",url:"/delete_msg_trend_item", data:{media_id:media_id},
+                success:function(rs){
+                    if(rs.code==1){
+                        $(`#tr_${media_id}`).fadeOut(1000); setTimeout(()=>{$(`#tr_${media_id}`).remove();},1200);
+                        Swal.fire('SUCCESS', `${rs.message}`,'success'); 
+                    }
+                    else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+                }
+            });
+        }
+    });
+});
+
+$("body").on("change","#social_type", function(){
+    let selected_media=$(this).val();
+    $("#selected_page").html(`<option selected disabled>Fetching option...</option>`);
+    $.ajax({
+        type:"POST",url:"/fetch_options", data:{selected_media:selected_media},
+        success:function(rs){
+            if(rs.code==1){$("#selected_page").html(rs.opt);}
+            else{$("#selected_page").html(`<option selected disabled>No Option found</option>`); Swal.fire('Error', `${rs.message}`,'warning'); }
+        }
+    });
+});
+
+$("#tone_item_form").submit(function(e){
+    e.preventDefault(); let form = $(this); $("#response").html(`<em>Processing..</em>`);
+    $.ajax({
+        type:"POST",url:"/add_newtone",data:form.serialize(),
+        success:function(res){
+            $("#form").modal("toggle"); 
+            if(res.code==1){
+                Swal.fire('SUCCESS', `${res.message}`,'success');
+                $("#tr_total").before(res.tag);
+            }
+            else{
+                Swal.fire('Error', `${res.message}`,'warning');
+            }
+        }
+    });
+});
+
+$("body").on("click",".delet_tr", function(){
+    let itemId=$(this).data("dataid");
+    Swal.fire({
+        title: 'Are you sure?',html: `You want to delete this Item from the list`, icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Yes, delete!'
+    })
+    .then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type:"POST",url:"/delete_tonality_item", data:{itemId:itemId},
+                success:function(rs){
+                    if(rs.code==1){
+                        $(`#tr_item_${itemId}`).fadeOut(1000); 
+                        setTimeout(()=>{$(`#tr_item_${itemId}`).remove();},1200);
+                        Swal.fire('SUCCESS', `${rs.message}`,'success'); 
+                    }
+                    else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+                }
+            });
+        }
+    });
+});
+
+function calculate_total(){
+    if($("#tr_total").length){
+        let total_positive=0, total_negative=0, total_neutral=0, total_unrelated=0,dm=0,messanger=0;
+        $("table").find(".positive").each(function(){let vl=Number($(this).html());total_positive+=vl;});
+        $("table").find(".positive").each(function(){let vl=Number($(this).html());total_negative+=vl;});
+        $("table").find(".positive").each(function(){let vl=Number($(this).html());total_neutral+=vl;});
+        $("table").find(".positive").each(function(){let vl=Number($(this).html());total_unrelated+=vl;});
+        $("table").find(".dm").each(function(){let vl=Number($(this).html());dm+=vl;});
+        $("table").find(".messanger").each(function(){let vl=Number($(this).html());messanger+=vl;});
+
+        $("#total_positive").html(total_positive); $("#total_negative").html(total_negative);
+        $("#total_neutral").html(total_neutral); $("#total_unrelated").html(total_unrelated);
+        $("#total_dm").html(dm); $("#total_messanger").html(messanger);
+    }
+}
+$(document).ready(function() { calculate_total(); });
+$("#counted_tone_search").submit(function(e){
+    e.preventDefault();let form=$(this); 
+    $("#counted_tone_list").find(".tr_item").remove();
+    $("#counted_tone_list").prepend(`<tr class='tr_item'><td colspan='6' style='text-align:center;'><em>Processing..</em></td></tr>`);
+    $.ajax({
+        type:"POST", url:"/counted_tone_search", data:form.serialize(),
+        success:function(res){
+            $("#counted_tone_list").find(".tr_item").remove();
+            if(res.code==1){
+                $("#tr_total").before(res.tones); calculate_total();}
+            else{$("#tr_total").before(res.tones); calculate_total();}
+        }
+    });
+});
+
+
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+//view data search
+$("#dataSearch").on("click",".opt_selectd", function(){
+    $(".opt_selectd").each(function(){ $(this).removeClass("active");})
+    let selection=$(this).data("opt");
+    $("#media_selected").val(selection);
+    $(this).addClass("active");
+});
+$("#dataSearch").submit(function(e){
+    e.preventDefault();let form=$(this); 
+    $("#tonality_list").find(".tr_item").remove();
+    $("#tonality_list").prepend(`<tr class='tr_item'><td colspan='6' style='text-align:center;'><em>Processing..</em></td></tr>`);
+    $.ajax({
+        type:"POST", url:"/data_view_search", data:form.serialize(),
+        success:function(res){
+            $("#tonality_list").find(".tr_item").remove();
+            if(res.code==1){$("#tr_total").before(res.tones); calculate_total();}
+            else{$("#tr_total").before(res.tones); calculate_total();}
+        }
+    });
+});
+
+//search data on message trend
+$("#dataSearch_social_message").submit(function(e){
+    e.preventDefault();let form=$(this); 
+    $("#trendList").find(".tr_item").remove();
+    $("#trendList").prepend(`<tr class='tr_item'><td colspan='6' style='text-align:center;'><em>Processing..</em></td></tr>`);
+    $.ajax({
+        type:"POST", url:"/search_message_trend", data:form.serialize(),
+        success:function(res){
+            $("#trendList").find(".tr_item").remove();
+            if(res.code==1){$("#tr_total").before(res.trends); calculate_total();}
+            else{$("#tr_total").before(res.trends); calculate_total();}
+        }
+    });
+});
+
+//add direct tone message
+$("#message_trend").submit(function(e){
+    e.preventDefault();let form=$(this); $("#mediaresp").html(`<em>Processing..</em>`);
+    $.ajax({
+        type:"POST", url:"/message_trend_server", data:form.serialize(),
+        success:function(res){
+            $(this).trigger("reset"); $("#mediaresp").html(``);
+            $("#message_trend_form").modal("toggle");
+            if(res.code==1){
+                if($("#trendList").find(`#empty_list`).length){ $("#trendList").find(`#empty_list`).remove(); }
+                $("#tr_total").before(res.tag); calculate_total();
+            }
+            else{$("#tr_total").before(res.tag); calculate_total();}
+        }
+    });
+});
+
+//add socialmedia group
+$("#new_social_group").submit(function(e){
+    e.preventDefault(); let form = $(this); 
+    $("#mediaresp").html(`<em>Processing..</em>`);
+    $.ajax({
+        type:'POST',url:'/social_media_handler',
+        data:form.serialize(),success:function(rs){
+            form.trigger("reset"); $("#new_tone_form").modal("toggle");
+            if(rs.code==1){
+                $("#mediaresp").html(``); $("#pageList").append(rs.tag);
+                $("#pageList").find(".tr_item").remove();
+                if($("#pageList").find(`#empty_list`).length){$("#pageList").find(`#empty_list`).remove();}
+                Swal.fire('SUCCESS', `${rs.message}`,'success'); 
+            }
+            else{Swal.fire('Error', `${rs.message}`,'warning');}
+        }
+    });
+});

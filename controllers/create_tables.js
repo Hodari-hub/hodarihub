@@ -22,8 +22,8 @@ var create_tables=()=>{
     conn.query(`CREATE TABLE IF NOT EXISTS bots(
         bot_id INT(11) NOT NULL AUTO_INCREMENT,owner_id INT(11) NOT NULL,bot_name TEXT NULL, 
         medianame VARCHAR(255) NOT NULL, media_address TEXT NOT NULL, description TEXT NOT NULL,
-        bot_phone VARCHAR(255) NULL,  api_key TEXT NULL,  apisecret TEXT NULL, access_token TEXT NULL,
-        access_secret TEXT NULL, media_password VARCHAR(255) NOT NULL, created_by INT(11) NOT NULL, 
+        bot_phone VARCHAR(255) NULL, api_key TEXT NULL, apisecret TEXT NULL, access_token TEXT NULL,
+        access_secret TEXT NULL, baretoken LONGTEXT NULL, media_password VARCHAR(255) NOT NULL, created_by INT(11) NOT NULL, 
         date_created DATETIME NULL,  PRIMARY KEY(bot_id)
     )`,function (error, result) {if (error) throw error;});
 
@@ -40,13 +40,9 @@ var create_tables=()=>{
             key_id INT(11) NOT NULL AUTO_INCREMENT,bot_id INT(11) NOT NULL,owner_id INT(11) NOT NULL,keyword TEXT NULL,PRIMARY KEY(key_id)
         )`,function (error, result) {if (error) throw error;});
 
-        conn.query(`CREATE TABLE IF NOT EXISTS daily_tone(
-            key_id INT(11) NOT NULL AUTO_INCREMENT,
-            key_word VARCHAR(255) NOT NULL,
-            user_id INT(11) NOT NULL,
-            media VARCHAR(255) NOT NULL,
-            date_created DATETIME NULL,
-            PRIMARY KEY(key_id)
+        conn.query(`CREATE TABLE IF NOT EXISTS daily_tone(key_id INT(11) NOT NULL AUTO_INCREMENT,
+            key_word VARCHAR(255) NOT NULL, user_id INT(11) NOT NULL, media VARCHAR(255) NOT NULL,
+            date_created DATETIME NULL,PRIMARY KEY(key_id)
         )`,function (error, result) {if (error) throw error;});
 
         conn.query(`CREATE TABLE IF NOT EXISTS daily_tonality(
@@ -60,6 +56,24 @@ var create_tables=()=>{
         conn.query(`CREATE TABLE IF NOT EXISTS retweet_from_specific(
             ky_id INT(11) NOT NULL AUTO_INCREMENT,user_id INT(11) NOT NULL,bot_id INT(11) NOT NULL,
             from_author_id VARCHAR(255) NOT NULL,from_author_name VARCHAR(255) NOT NULL,keyword TEXT NOT NULL,date_created DATETIME NULL,PRIMARY KEY(ky_id)
+        )`,function (error, result) {if (error) throw error;});
+
+        conn.query(`CREATE TABLE IF NOT EXISTS social_media(media_id INT(11) NOT NULL AUTO_INCREMENT, user_id INT(11) NOT NULL,
+            page_name TEXT NOT NULL,media_name VARCHAR(255) NOT NULL,PRIMARY KEY(media_id)
+        )`,function (error, result) {if (error) throw error;});
+
+        conn.query(`CREATE TABLE IF NOT EXISTS message_trend(
+            messageid INT(11) NOT NULL AUTO_INCREMENT, user_id INT(11) NOT NULL,
+            dm_message VARCHAR(255) NOT NULL, messanger VARCHAR(255) NOT NULL,
+            datemade DATE NOT NULL,  PRIMARY KEY(messageid)
+        )`,function (error, result) {if (error) throw error;});
+
+        conn.query(`CREATE TABLE IF NOT EXISTS tonality(
+            t_id INT(11) NOT NULL AUTO_INCREMENT,u_id INT(11) NOT NULL, 
+            media_type VARCHAR(255) NOT NULL, page_id INT(11) NOT NULL,
+            link VARCHAR(255) NOT NULL, positive VARCHAR(255) NOT NULL, negative VARCHAR(255) NOT NULL, 
+            neautral VARCHAR(255) NOT NULL,unrelated VARCHAR(255) NOT NULL, total INT NOT NULL,
+            date_created DATETIME NULL, PRIMARY KEY(t_id)
         )`,function (error, result) {if (error) throw error;});
 }
 

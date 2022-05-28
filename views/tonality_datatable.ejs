@@ -1,0 +1,117 @@
+<%- include("./partials/headers.ejs"); %>
+  <div class="wrapper">
+    <%- include("./partials/topbar.ejs"); %>
+    <%- include("./partials/sideMenu.ejs"); %>
+    <!-- Main content div -->
+    <div class='content-wrapper'>
+        <div class='container m-auto py-3'>
+            <div class="container p-0 py-4">
+                <form id="dataSearch">
+                    <input type="hidden" id="media_selected" name="media_selected">
+                    <div class="container p-0 my-4">
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <button type="button" class="btn btn-secondary opt_selectd" data-opt="all">ALL</button> 
+                            <button type="button" class="btn btn-secondary opt_selectd" data-opt="facebook">FB</button>
+                            <button type="button" class="btn btn-secondary opt_selectd" data-opt="twitter">TWITTER</button> 
+                            <button type="button" class="btn btn-secondary opt_selectd" data-opt="instagram">IG</button>
+                            <button type="button" class="btn btn-secondary opt_selectd" data-opt="website">WEB</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <input type="hidden" id="socialname" name="socialname">
+                        <div class="col-12 col-sm-12 col-md-5 my-1"><input type="date" class="form-control" id="from" name="from"></div>
+                        <div class="col-12 col-sm-12 col-md-5 my-1"><input type="date" class="form-control" id="to" name="to"></div>
+                        <div class="col-12 col-sm-12 col-md-2 mx-auto my-1"><button class="btn btn-primary">Search</button></div>
+                    </div>
+                </form>
+            </div>
+            <div class="card">
+                <div class="card-header border-transparent">
+                    <h3 class="card-title">ITEM LIST</h3>
+                    <div class="card-tools">
+                        <button type="button" data-toggle="modal" data-target="#form" class="btn btn-tool"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table m-0">
+                            <thead><tr><th>DATE</th><th>PAGE</th><th>POSITIVE</th><th>NEGATIVE</th><th>NEUTRAL</th><th>UNRELATED</th></tr></thead>
+                            <tbody id="tonality_list">
+                                <%- locals.tones %>
+                                <tr id="tr_total" style="display:table-row;">
+                                    <td data-label="" colspan="1">TOTAL</td><td></td>
+                                    <td data-label="Tota Positive" id="total_positive" class="total_positive"></td>
+                                    <td data-label="Total Negative" id="total_negative" class="total_negative"></td>
+                                    <td data-label="Total Neutral" id="total_neutral" class="total_neutral"></td>
+                                    <td data-label="Total Unrelated" id="total_unrelated" class="total_unrelated"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- pop up the form for entering phone number-->
+    <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form id='tone_item_form' name="tone_item_form">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col col-md-12">
+                                    <select class="custom-select" id="social_type" name='social_type' required>
+                                        <option value="facebook" selected>FACEBOOK</option>
+                                        <option value="instagram">INSTAGRAM</option>
+                                        <option value="jamiiforums">JAMII FORUMS</option>
+                                        <option value="twitter">TWITTER</option>
+                                        <option value="youtube">YOUTUBE</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col col-md-12">
+                                    <select class="custom-select" id="selected_page" name='selected_page' required>
+                                        <option selected disabled>CHOOSE PAGE</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col col-md-12">
+                                    <input type="text" class="form-control" id='link' name='link' placeholder="Pest Link" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col">
+                                    <input type="number" class="form-control" name='positive' placeholder="Positive" min="0" required>
+                                </div>
+                                <div class="col">
+                                    <input type="number" class="form-control" name='negative' placeholder="Negative" min="0" required>
+                                </div>
+                                <div class="col">
+                                    <input type="number" class="form-control" name='neautral' placeholder="Neautral" min="0" required>
+                                </div>
+                                <div class="col">
+                                    <input type="number" class="form-control" name='unrelated' placeholder="Unrelated" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="response" style="text-align:center;"></div>
+                    <div class="modal-footer border-top-0 d-flex justify-content-center"><button type="submit" class="btn btn-primary rounded"> &nbsp; ADD DATA</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- middle footer -->
+    <%- include("./partials/middle_footer.ejs"); %>
+  </div>
+<%- include("./partials/footer.ejs"); %>

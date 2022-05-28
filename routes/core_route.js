@@ -76,7 +76,9 @@ route.get("/dashboard",isAuth,(req,res)=>{
                     else{ res.render("dashboard",{pageTitle:"DASHBOARD",user_name:u_name,member_list:[users]}); }
                 });
             }
-            else{res.render("/logout",{title:"Log Out"});}
+            else{
+                res.redirect("/logout",{title:"Log Out"});
+            }
         });
 });
 
@@ -317,7 +319,8 @@ route.get("/bystanders",isAuth,(req,res)=>{
     if(req.cookies.userType=="admin"){checker=`1`;}else{checker=`key_bystander.owner_id='${req.cookies.userId}' `;}
     conn.query(`SELECT * FROM key_bystander LEFT JOIN bots ON key_bystander.bot_id=bots.bot_id JOIN base_members ON key_bystander.owner_id=base_members.m_id WHERE ${checker}`, 
         function (error, results) {
-            if(error) throw error; let bystanders="";
+            let bystanders="";
+            if(error) {res.render("key_bystander", {pageTitle:"BYSTANDERS",user_name:req.cookies.userName,bystanders:[bystanders]});}; 
             if(results.length){
                 for(let i =0; i<results.length; i++){
                     bystanders+=`<tr id='tr_${results[i].key_id}'> <td>${i+1}</td><td>${results[i].bot_name}</td><td>${results[i].keyword}</td><td>${results[i].m_name}</td>
@@ -336,7 +339,8 @@ route.get("/bystander",isAuth,(req,res)=>{
     if(req.cookies.userType=="admin"){checker=`1`;}else{checker=`owner_id='${req.cookies.userId}' `;}
     conn.query(`SELECT * FROM bots WHERE ${checker}`, 
         function (error, results) {
-            if(error) throw error; let bots="";
+            let bots="";
+            if(error) { res.render("forms",{pageTitle:"ADD NEW BYSTANDER",user_name:req.cookies.userName, form:"bystander", bots:[bots]});}
             if(results.length){
                 for(let i =0; i<results.length; i++){
                     let bot_name=results[i].bot_name,bot_id=results[i].bot_id;
@@ -353,7 +357,10 @@ route.get("/tone_counter",isAuth,(req,res)=>{
     if(req.cookies.userType=="admin"){checker=`1`;}else{checker=`user_id='${req.cookies.userId}' `;}
     conn.query(`SELECT * FROM daily_tone WHERE ${checker}`, 
         function (error, results) {
-            if(error) throw error; let words="";
+            let words="";
+
+            if(error) {res.render("tone_counter",{pageTitle:"TONE COUNTER",user_name:req.cookies.userName,words:[words]});}
+
             if(results.length){
                 for(let i =0; i<results.length; i++){
                     let key_word=results[i].key_word,key_id=results[i].key_id;
@@ -370,30 +377,14 @@ route.get("/tone_counter",isAuth,(req,res)=>{
 
 route.get("/new_keywords",isAuth,(req,res)=>{res.render("forms",{pageTitle:"ADD NEW KEYWORD", user_name:req.cookies.userName, form:"newkeyword" });});
 
-route.get("/fromspecific",isAuth,(req,res)=>{
-    if(req.cookies.userType=="admin"){checker=`1`;}else{checker=` retweet_from_specific.user_id='${req.cookies.userId}' `;}
-    conn.query(`SELECT * FROM retweet_from_specific LEFT JOIN bots ON retweet_from_specific.bot_id=bots.bot_id WHERE ${checker}`,(err,rs)=>{
-        if(err) throw err; let listeners="";
-        if(rs.length){
-            for(let i =0; i<rs.length; i++){
-                listeners+=`<tr id='tr_${rs[i].ky_id}'><td>${i+1}</td><td>${rs[i].bot_name}</td><td>${rs[i].keyword}</td><td>${rs[i].from_author_name}</td><td>${rs[i].from_author_id}</td>
-                                <td><span class="badge badge-danger delete_keywords" role='button' data-name='${rs[i].keyword}' data-id='${rs[i].ky_id}'>Delete</span></td>
-                            </tr>`;
-            }
-
-            res.render("retweet_from_specific",{pageTitle:"LISTENERS", user_name:req.cookies.userName,listener:[listeners]});
-        }
-        else{
-            listeners=`<tr><td colspan='9' style='text-align:center;'>No details found</td></tr>`;
-            res.render("retweet_from_specific",{pageTitle:"LISTENERS", user_name:req.cookies.userName,listener:[listeners]});
-        }
-    });
-});
 route.get("/new_listener",isAuth,(req,res)=>{
     if(req.cookies.userType=="admin"){checker=`1`;}else{checker=`owner_id='${req.cookies.userId}' `;}
     conn.query(`SELECT * FROM bots WHERE ${checker}`, 
     function (error, results) {
-        if(error) throw error; let bots="";
+        let bots="";
+
+        if(error) { res.render("forms",{pageTitle:"ADD NEW LISTENER", user_name:req.cookies.userName, form:"listener", bots:[bots]});}
+
         if(results.length){
             for(let i =0; i<results.length; i++){
                 let bot_name=results[i].bot_name,bot_id=results[i].bot_id;
@@ -403,6 +394,155 @@ route.get("/new_listener",isAuth,(req,res)=>{
             res.render("forms",{pageTitle:"ADD NEW LISTENER", user_name:req.cookies.userName, form:"listener", bots:[bots]});
         }
         else{res.render("forms",{pageTitle:"ADD NEW LISTENER", user_name:req.cookies.userName, form:"listener", bots:[bots]});}
+    });
+});
+
+//view counted note
+route.get("/view_counted_tone",isAuth,(req,res)=>{
+    conn.query(`SELECT * FROM daily_tone WHERE 1`, function (error, results) {
+        let opt="",isSelected="",countedtone="";
+
+        if(error) {
+            opt=`<option value="" selected>${error}</option>`;
+            res.render("view_counted_tone",{pageTitle:"TWITTER TONE", user_name:req.cookies.userName,opt:opt,countedtone: countedtone});
+        }
+
+        if(results.length){
+            for(let i=0; i<results.length; i++){
+                let key_word=results[i].key_word,media=results[i].media,key_id=results[i].key_id;
+                if(i==0){isSelected="selected";}
+                opt+=`<option value="${key_id}" ${isSelected}>${key_word.toUpperCase()} (${media})</option>`;
+            }
+            countedtone=`<tr class="tr_item"><td colspan='6' style='text-align:center;'>No data found</td></tr>`;
+            res.render("view_counted_tone",{pageTitle:"TWITTER TONE", user_name:req.cookies.userName,opt:opt,countedtone: countedtone});
+        }
+        else{
+            countedtone=`<tr class="tr_item"><td colspan='6' style='text-align:center;'>No data found</td></tr>`;
+            opt=`<option value="" selected>No Key Found</option>`;
+            res.render("view_counted_tone",{pageTitle:"TWITTER TONE", user_name:req.cookies.userName,opt:opt,countedtone: countedtone});
+        }
+    });
+});
+
+//retweet from specific user
+route.get("/fromspecific",isAuth,(req,res)=>{
+    if(req.cookies.userType=="admin"){checker=`1`;}else{checker=` retweet_from_specific.user_id='${req.cookies.userId}' `;}
+    conn.query(`SELECT * FROM retweet_from_specific LEFT JOIN bots ON retweet_from_specific.bot_id=bots.bot_id WHERE ${checker}`,(err,rs)=>{
+        let listeners="";
+
+        if(err) {
+            listeners=`<tr><td colspan='9' style='text-align:center;'>${err}</td></tr>`;
+            res.render("retweet_from_specific",{pageTitle:"LISTENERS", user_name:req.cookies.userName,listener:[listeners]});
+        }
+        
+        if(rs.length){
+            for(let i =0; i<rs.length; i++){
+                listeners+=`<tr id='tr_${rs[i].ky_id}'><td>${i+1}</td><td>${rs[i].bot_name}</td><td>${rs[i].keyword}</td><td>${rs[i].from_author_name}</td><td>${rs[i].from_author_id}</td>
+                                <td><span class="badge badge-danger delete_keywords" role='button' data-name='${rs[i].keyword}' data-id='${rs[i].ky_id}'>Delete</span></td>
+                            </tr>`;
+            }
+            res.render("retweet_from_specific",{pageTitle:"LISTENERS", user_name:req.cookies.userName,listener:[listeners]});
+        }
+        else{
+            listeners=`<tr><td colspan='9' style='text-align:center;'>No details found</td></tr>`;
+            res.render("retweet_from_specific",{pageTitle:"LISTENERS", user_name:req.cookies.userName,listener:[listeners]});
+        }
+    });
+});
+
+//view all data
+route.get("/viewdata",isAuth,(req,res)=>{
+    conn.query(`SELECT * FROM tonality LEFT JOIN social_media ON tonality.page_id=social_media.media_id WHERE 1 LIMIT 10`, 
+    function (error, results) {
+        let tones=""; 
+
+        if(error) {
+            tones=`<tr><td colspan='3' style='text-align:center;' id="empty_list">${error}</td></tr>`;
+            res.render("tonality_datatable",{pageTitle:"SOCIAL MEDIA TONE", user_name:req.cookies.userName,tones:tones});
+        } 
+        
+        if(results.length){
+            for(let i =0; i<results.length; i++){
+                let t_id=results[i].t_id,page_name=results[i].page_name, positive=results[i].positive, negative=results[i].negative,
+                neautral=results[i].neautral, unrelated=results[i].unrelated,date_created=results[i].date_created.toISOString().slice(0, 10);
+                if(i==0){ isSelected="selected";}else{ isSelected="";}
+                tones+=`<tr class="tr_item" id='tr_item_${t_id}'>
+                            <td class="date_tr">
+                                <span class="action_span border"><i id="delet_btn_${t_id}" role="button" class="fa fa-trash  fa-1x delet_tr" title="Delete This Item" aria-hidden="true" data-dataid="${t_id}"></i></span> 
+                                ${date_created}
+                            </td>
+                            <td>${page_name}</td><td class='positive'>${positive}</td><td class='negative'>${negative}</td><td class='neutral'>${neautral}</td><td class='unrelated'>${unrelated}</td>
+                        </tr>`;
+            }
+            res.render("tonality_datatable",{pageTitle:"SOCIAL MEDIA TONE", user_name:req.cookies.userName,tones:tones});
+        }
+        else{
+            tones=`<tr><td colspan='3' style='text-align:center;' id="empty_list">No data found</td></tr>`;
+            res.render("tonality_datatable",{pageTitle:"SOCIAL MEDIA TONE", user_name:req.cookies.userName,tones:tones});
+        }
+    });
+});
+
+//view social message trends
+route.get("/social_messages",isAuth,(req,res)=>{
+    conn.query(`SELECT * FROM message_trend WHERE 1`, function (error, results) {
+        let table_data="";
+
+        if(error) { 
+            table_data=`<tr class="tr_item" id='empty_list'><td colspan='3' style='text-align:center;'>${error}</td></tr>`;
+            res.render("tonality_message",{pageTitle:"SOCIAL MEDIA MESSAGES TREND", user_name:req.cookies.userName, table_data:table_data});
+        }
+
+        if(results.length){
+            for(let i =0; i<results.length; i++){
+                let messageid=results[i].messageid,dm_message=results[i].dm_message,
+                messanger=results[i].messanger, datemade=results[i].datemade;
+                table_data+=`<tr id='tr_${messageid}' class="tr_item">
+                                <td class="date_tr">
+                                    <span class="action_span border"><i id="delet_btn_${messageid}" role="button" class="fa fa-trash  fa-1x delete_msg" title="Delete This Item" aria-hidden="true" data-id="${messageid}"></i></span> 
+                                    ${datemade}
+                                </td>
+                                <td class='dm'>${dm_message}</td><td class='messanger'>${messanger}</td>
+                            </tr>`;
+            }
+            res.render("tonality_message",{pageTitle:"SOCIAL MEDIA MESSAGES TREND", user_name:req.cookies.userName, table_data:table_data});
+        }
+        else{
+            table_data=`<tr class="tr_item" id='empty_list'><td colspan='3' style='text-align:center;'>No data found</td></tr>`;
+            res.render("tonality_message",{pageTitle:"SOCIAL MEDIA MESSAGES TREND", user_name:req.cookies.userName, table_data:table_data});
+        }
+    });
+});
+
+//load media list to the user
+route.get("/media_list",isAuth,(req,res)=>{
+    conn.query(`SELECT * FROM social_media WHERE 1`, function (error, results) {
+
+        let table_data="";
+
+        //handle error
+        if(error){
+            table_data=`<tr class='tr_item' id="empty_list"><td colspan='2' style='text-align:center;'>${error}</td></tr>`;
+            res.render("tonality_medialist",{pageTitle:"MEDIA LIST", user_name:req.cookies.userName, table_data:table_data});
+        }
+        
+        if(results.length){
+            for(let i =0; i<results.length; i++){
+                let page_name=results[i].page_name.toUpperCase(),media_name=results[i].media_name.toUpperCase();
+                table_data+=`<tr class='tr_item' id='tr_${results[i].media_id}'>
+                                <td class="date_tr">
+                                    <span class="action_span"><i id="delet_btn_${results[i].media_id}" role="button" class="fa fa-trash  fa-1x delete_media" title="Delete This Item" data-name='${page_name}' data-id='${results[i].media_id}'></i></span> 
+                                    ${media_name}
+                                </td>
+                                <td>${page_name}</td>
+                            </tr>`;
+            }
+            res.render("tonality_medialist",{pageTitle:"MEDIA LIST", user_name:req.cookies.userName, table_data:table_data});
+        }
+        else{
+            table_data=`<tr class='tr_item' id="empty_list"><td colspan='2' style='text-align:center;'>No data found</td></tr>`;
+            res.render("tonality_medialist",{pageTitle:"MEDIA LIST", user_name:req.cookies.userName, table_data:table_data});
+        }
     });
 });
 
