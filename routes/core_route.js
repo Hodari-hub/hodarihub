@@ -135,12 +135,9 @@ route.get("/socialmedia",isAuth,(req,res)=>{
         if(rs.length){
             for(let i =0; i<rs.length; i++){
                 bots+=`<tr id='tr_${rs[i].bot_id}'>
-                        <td>${i+1}</td>
-                        <td>${rs[i].medianame}</td>
-                        <td>${rs[i].bot_name}</td>
-                        <td>${rs[i].media_password}</td>
-                        <td>${rs[i].media_address}</td>
-                        <td>${rs[i].bot_phone}</td>
+                        <td>${i+1}</td> <td>${rs[i].medianame}</td>
+                        <td>${rs[i].bot_name}</td> <td>${rs[i].media_password}</td>
+                        <td>${rs[i].media_address}</td> <td>${rs[i].bot_phone}</td>
                         <td>${rs[i].m_name}</td>
                         <td>
                             <span class="badge badge-danger deletesocial" role='button' data-id='${rs[i].bot_id}' data-myname='${rs[i].bot_name}'>Delete</span>
