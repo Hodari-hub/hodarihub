@@ -9,8 +9,12 @@
                     <div class='py-4 row container-fluid m-auto'>
                         <div class="col-md-5 m-auto">
                             <div>
-                                <a href="/edit_user/<%- locals.userid %>" class="btn btn-info">EDIT</a>
-                                <button id="delete_user" data-userid="<%- locals.userid %>" class="btn btn-danger">DELETE</button>
+                                <% if(locals.showbtn==1||locals.isAdmin==1){%>
+                                    <a href="/edit_user/<%- locals.userid %>" class="btn btn-info">EDIT</a>
+                                <%}%>
+                                <% if(locals.isAdmin){%>
+                                    <button id="delete_user" data-userid="<%- locals.userid %>" class="btn btn-danger">DELETE</button>
+                                <%}%>
                             </div><br>
                             <!-- Widget: user widget style 2 -->
                             <div class="card card-widget widget-user-2">

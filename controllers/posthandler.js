@@ -88,9 +88,9 @@ post_route.post("/deletuser",isAuth,(req,res)=>{
 });
 
 post_route.post("/edit_user",isAuth,(req,res)=>{
-    const {fname, uaddress, phone1, phone2, utype, location, description, password}=req.body;
+    const {fname, uaddress, phone1, phone2, utype, location, description, password,user_id}=req.body;
     let hashpassword = bcrypt.hashSync(password, 8);
-    conn.query(`UPDATE base_members SET m_name='${fname}',m_email='${uaddress}',m_phone_number='${phone1}',m_sec_number='${phone2}',m_pass='${hashpassword}',m_type='${utype}',m_description='${description}',m_location='${location}',m_pass='${hashpassword}' WHERE m_id='${req.cookies.userId}' AND m_pass='${req.cookies.userPass}'`,(err,resp)=>{
+    conn.query(`UPDATE base_members SET m_name='${fname}',m_email='${uaddress}',m_phone_number='${phone1}',m_sec_number='${phone2}',m_pass='${hashpassword}',m_type='${utype}',m_description='${description}',m_location='${location}',m_pass='${hashpassword}' WHERE m_id='${user_id}'`,(err,resp)=>{
         if(err) { res.json({code: 0,message:err}); res.end(); return; }
         if(resp.affectedRows){ res.cookie('userPass',hashpassword); res.json({code: 1,userid:req.cookies.userId,message:"Succesfuly!, user deleted"}); res.end(); }
         else{res.json({code: 0,message:"Unknown error occurred, user couldn't be deleted!"}); res.end(); }

@@ -77,31 +77,33 @@ route.get("/dashboard",isAuth,(req,res)=>{
                 });
             }
             else{
-                res.redirect("/logout",{title:"Log Out"});
+                res.render("logout",{title:"Log Out"});
             }
-        });
+    });
 });
 
 //view user profile
 route.get("/profile/:id",isAuth,(req,res)=>{
     conn.query(`SELECT * FROM base_members WHERE m_id='${req.params.id}'`, 
         function (error, results) {
-            if(error) throw error
+            if(error) { res.redirect("/"); return; }
             if(results.length){
                 let m_id=results[0].m_id,m_pic=results[0].m_pic,m_name=results[0].m_name.toUpperCase();
                 let m_location=results[0].m_location,m_description=results[0].m_description;
                 let m_phone_number=results[0].m_phone_number,m_sec_number=results[0].m_sec_number;
                 let m_email=results[0].m_email,m_type=results[0].m_type.toUpperCase();
+                let showbtn=0,isAdmin=0; if(req.cookies.userId==m_id){ showbtn=1;}else{ showbtn=0;}
+                if(req.cookies.userType=="admin"){isAdmin=1;}else{isAdmin=0;}
 
                 //get all bots owned by this user
                 conn.query(`SELECT * FROM bots WHERE owner_id='${m_id}' ORDER BY bot_name`,(err,rs)=>{
                     if(err) throw err; let bots="";
                     if(rs.length){
                         for(let i =0; i<rs.length; i++){bots+=`<tr><td>${i+1}</td><td>${rs[i].bot_name}</td><td>${rs[i].media_password}</td><td>${rs[i].media_address}</td><td>${rs[i].bot_phone}</td></tr>`;}
-                        res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id});
+                        res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id,showbtn:showbtn,isAdmin:isAdmin});
                     }
-                    else{res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id});}
-                })
+                    else{res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id,showbtn:showbtn,isAdmin:isAdmin});}
+                });
             }
             else{ res.render("dashboard", {pageTitle:"DASHBOARD",user_name:req.cookies.userName}); }
     });
