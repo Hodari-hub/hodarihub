@@ -46,13 +46,13 @@ post_route.post("/addnewmember",isAuth,(req,res)=>{
 
 //add new bot to the database
 post_route.post("/addnewbot",isAuth,(req,res)=>{
-    const {baretoken,bots_name,medianame,owner_id,media_address,bots_phone,password,api_key,apisecret,access_token,access_secret,description}=req.body;
+    const {baretoken,bots_name,bots_id,medianame,owner_id,media_address,bots_phone,password,api_key,apisecret,access_token,access_secret,description}=req.body;
     //check if user exist first
     conn.query(`SELECT * FROM bots WHERE medianame='${medianame}' AND owner_id='${owner_id}' AND bot_name='${bots_name}'`,(err,results)=>{
         if(err) throw err;
         if(!results.length){
             //if user is not exist then insert the new user to the database
-            conn.query(`INSERT INTO bots SET ?`,{baretoken:baretoken,owner_id:owner_id,bot_name:bots_name,medianame:medianame,media_address:media_address,description:description,bot_phone:bots_phone,api_key:api_key,apisecret:apisecret,access_token:access_token,access_secret:access_secret,media_password:password,created_by:req.cookies.userId,date_created:new Date().toISOString().slice(0, 20)}, 
+            conn.query(`INSERT INTO bots SET ?`,{bots_id:bots_id,baretoken:baretoken,owner_id:owner_id,bot_name:bots_name,medianame:medianame,media_address:media_address,description:description,bot_phone:bots_phone,api_key:api_key,apisecret:apisecret,access_token:access_token,access_secret:access_secret,media_password:password,created_by:req.cookies.userId,date_created:new Date().toISOString().slice(0, 20)}, 
             function(error, results) {
 
                 if(error) { res.json({code: 0,message:error}); res.end(); return; }
@@ -127,7 +127,7 @@ post_route.post("/new_email",isAuth,(req,res)=>{
 
 //edit bot
 post_route.post("/edit_bot_form",isAuth,(req,res)=>{
-    const {baretoken,bot_id,bots_name,medianame,owner_id,media_address,bots_phone,password,api_key,apisecret,access_token,access_secret,description}=req.body;
+    const {baretoken,bot_id,bots_ac_id,bots_name,medianame,owner_id,media_address,bots_phone,password,api_key,apisecret,access_token,access_secret,description}=req.body;
     let changeOwner,admn;
 
     if(req.cookies.userType=="admin"){changeOwner=`owner_id='${owner_id}',`;admn=``;}
@@ -136,7 +136,7 @@ post_route.post("/edit_bot_form",isAuth,(req,res)=>{
     conn.query(`
         UPDATE bots SET ${changeOwner}bot_name='${bots_name}',medianame='${medianame}',
         media_address='${media_address}',description='${description}',bot_phone='${bots_phone}',
-        api_key='${api_key}',apisecret='${apisecret}',baretoken='${baretoken}',
+        api_key='${api_key}',apisecret='${apisecret}',baretoken='${baretoken}',bots_id='${bots_ac_id}',
         access_token='${access_token}',access_secret='${access_secret}',media_password='${password}'
         WHERE bot_id='${bot_id}'${admn}`,
         (err,resp)=>{

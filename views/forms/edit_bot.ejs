@@ -6,6 +6,10 @@
             <input type="text" id="bots_name" name="bots_name" class="form-control text-center" placeholder="Enter Bot Name" value="<%- locals.bot_name %>">
         </div>
         <div class="form-group">
+            <label for="bots_ac_id">Bot Id</label>
+            <input type="text" id="bots_ac_id" name="bots_ac_id" class="form-control text-center" placeholder="Enter Bot Id" value="<%- locals.bots_id %>">
+        </div>
+        <div class="form-group">
             <label for="medianame">Media Name</label>
             <select id="medianame" name="medianame" class="form-control text-center">
                 <option value="facebook" <% if(locals.medianame=="facebook"){%> selected <%}%>>Facebook</option>

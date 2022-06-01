@@ -12,6 +12,7 @@ const rt_fromspecific=require("./controllers/retweet_from_specific");
 const tone_counter=require("./controllers/tone_counter");
 const socket= require("socket.io");
 const needle = require('needle');
+const twitt_listener=require("./controllers/twit_listener");
 
 //SOCKET HANDLER
 const io_rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
@@ -32,6 +33,8 @@ _tables.create_tables();
 bystander.start_the_process();
 //retweet from the specific 
 rt_fromspecific.start_process();
+//start listening tweet 
+twitt_listener.start_listening();
 
 //initial core admin
 _new_user.new_user('Deogratius Mabima', 'deogratius@umojasystems.com', '0756935683', '0658913666', 'Upanga', 'No description', 0, '#Ushindi@123','admin');
@@ -105,8 +108,8 @@ var initialize_rules = async (BareToken,newrule)=>{
     catch (error) {process.exit(1);}
 }
 
-//deodinho bot (here has to be set the default bare code)
-let bare="AAAAAAAAAAAAAAAAAAAAABsMcwEAAAAABJMbQN36A4Zqm5vIGPVzSxn6s90%3DuGr8n0pxZlIXZNkOxFaP5gKeYWX4NpJ3fgWfxCCVcF5BqM8jke";
+//GEORGE MLAWA bot (here has to be set the default bare code)
+let bare="AAAAAAAAAAAAAAAAAAAAAPs3UwEAAAAA4A8wV5DdD0sKMqeYYaYyJ00%2Bc3U%3D1xyvw5zev4IRhfQXX17PAh84FtJbJiRXuyDwwZPicpFkQH9WWX";
 
 //check if the socket is connnected
 io.on("connection",(sockets)=>{

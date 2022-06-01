@@ -75,6 +75,20 @@ var create_tables=()=>{
             neautral VARCHAR(255) NOT NULL,unrelated VARCHAR(255) NOT NULL, total INT NOT NULL,
             date_created DATETIME NULL, PRIMARY KEY(t_id)
         )`,function (error, result) {if (error) throw error;});
+
+        //update bots table insert new column
+        conn.query(`ALTER TABLE bots ADD COLUMN IF NOT EXISTS bots_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+        //create twitter stats table
+        conn.query(`CREATE TABLE IF NOT EXISTS twitter_stats(
+            stats_id INT(11) NOT NULL AUTO_INCREMENT,owner_id INT(11) NOT NULL, 
+            post_type VARCHAR(255) NOT NULL, post_id INT(11) NOT NULL,
+            impression INT(11) NOT NULL, engagement INT(11) NOT NULL, 
+            detailed_expand INT(11) NOT NULL, followers INT(11) NOT NULL, 
+            profile_views INT NOT NULL, retweets INT NOT NULL,key_word TEXT NOT NULL,
+            replies INT NOT NULL, likes INT NOT NULL,quotes INT NOT NULL,
+            date_created DATETIME NULL, PRIMARY KEY(stats_id)
+        )`,function (error, result) {if (error) throw error;});
+        
 }
 
 module.exports={create_tables};

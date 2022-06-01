@@ -256,7 +256,7 @@ route.get("/edit_bot/:botid",isAuth,(req,res)=>{
                 bot_phone=results[0].bot_phone, api_key=results[0].api_key,
                 apisecret=results[0].apisecret, access_token=results[0].access_token,
                 access_secret=results[0].access_secret, media_password=results[0].media_password,
-                owner_id=results[0].owner_id,baretoken=results[0].baretoken;
+                owner_id=results[0].owner_id,baretoken=results[0].baretoken,bots_id=results[0].bots_id;
 
 
                 conn.query('SELECT * FROM base_members ORDER BY m_name',(err,rs)=>{
@@ -273,7 +273,7 @@ route.get("/edit_bot/:botid",isAuth,(req,res)=>{
                             bot_name:bot_name,medianame:medianame,media_address:media_address,
                             description:description,bot_phone:bot_phone,api_key:api_key,
                             apisecret:apisecret,access_token:access_token,access_secret:access_secret,
-                            media_password:media_password,baretoken:baretoken,memberlist:[member_list]
+                            media_password:media_password,baretoken:baretoken,memberlist:[member_list],bots_id:bots_id
                         });
                     }
                     else{ res.render("dashboard", {pageTitle:"DASHBOARD",user_name:req.cookies.userName});}
