@@ -1,6 +1,8 @@
 const express = require("express");
 const route = express.Router();
 const conn = require("../modals/connection");
+const config={host:'localhost',user:'root',password:'',database:'hodarihub'};
+var syncSql = require('sync-sql');
 
 //authed check
 const isAuth=(req,res,next)=>{
@@ -28,6 +30,27 @@ const isLogedIn=(req,res,next)=>{
 //handle user when comes to the home page
 route.get("/",isLogedIn,(req,res)=>{res.render("index",{title:"Log In"});});
 
+function getPostNum(userid){
+    var checkpost = syncSql.mysql(config, `
+                                SELECT COUNT(stats_id) AS numpost FROM twitter_stats
+                                LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id
+                                LEFT JOIN base_members ON base_members.m_id=bots.owner_id
+                                WHERE base_members.m_id='${userid}' AND twitter_stats.post_type='POST OR COMMENT'
+                            `);
+
+    return checkpost.data.rows[0].numpost;
+}
+function getRetweets(userid){
+    var checkRt = syncSql.mysql(config, `
+                                SELECT COUNT(stats_id) AS rt FROM twitter_stats
+                                LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id
+                                LEFT JOIN base_members ON base_members.m_id=bots.owner_id
+                                WHERE base_members.m_id='${userid}' AND twitter_stats.post_type='RT'
+                            `);
+                        
+    return checkRt.data.rows[0].rt;
+}
+
 //handle dashboard accessor
 route.get("/dashboard",isAuth,(req,res)=>{
     conn.query(`SELECT * FROM base_members WHERE m_email='${req.cookies.userEmail}' AND m_pass='${req.cookies.userPass}'`, 
@@ -41,6 +64,7 @@ route.get("/dashboard",isAuth,(req,res)=>{
                     if(err) throw err; let users="";
                     if(rs.length){
                         for(let i =0; i<rs.length; i++){
+
                             users+=`<div class="col-md-3">
                                         <a href='/profile/${rs[i].m_id}'>
                                             <div class="card card-widget widget-user shadow">
@@ -55,13 +79,13 @@ route.get("/dashboard",isAuth,(req,res)=>{
                                                     <div class="row">
                                                         <div class="col-sm-6 border-right">
                                                             <div class="description-block">
-                                                                <h5 class="description-header">0</h5>
+                                                                <h5 class="description-header">${getPostNum(rs[i].m_id)}</h5>
                                                                 <span class="description-text">POST</span>
                                                             </div>
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <div class="description-block">
-                                                                <h5 class="description-header">0</h5>
+                                                                <h5 class="description-header">${getRetweets(rs[i].m_id)}</h5>
                                                                 <span class="description-text">RETWEET</span>
                                                             </div>
                                                         </div>
@@ -91,18 +115,28 @@ route.get("/profile/:id",isAuth,(req,res)=>{
                 let m_id=results[0].m_id,m_pic=results[0].m_pic,m_name=results[0].m_name.toUpperCase();
                 let m_location=results[0].m_location,m_description=results[0].m_description;
                 let m_phone_number=results[0].m_phone_number,m_sec_number=results[0].m_sec_number;
-                let m_email=results[0].m_email,m_type=results[0].m_type.toUpperCase();
+                let m_email=results[0].m_email,m_type=results[0].m_type.toUpperCase(),numpost=0,numrt=0,reach=0;
                 let showbtn=0,isAdmin=0; if(req.cookies.userId==m_id){ showbtn=1;}else{ showbtn=0;}
                 if(req.cookies.userType=="admin"){isAdmin=1;}else{isAdmin=0;}
 
+                numpost=syncSql.mysql(config, `SELECT COUNT(stats_id) AS numpost FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`).data.rows[0].numpost;
+                numrt=syncSql.mysql(config, `SELECT COUNT(stats_id) AS numrt FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='RT'`).data.rows[0].numrt;
+                impres=syncSql.mysql(config, `SELECT SUM(impression) AS impres FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`).data.rows[0].impres;
+                reach=syncSql.mysql(config, `SELECT SUM(reach) AS reach FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`).data.rows[0].reach;
+
                 //get all bots owned by this user
-                conn.query(`SELECT * FROM bots WHERE owner_id='${m_id}' ORDER BY bot_name`,(err,rs)=>{
+                conn.query(`SELECT * FROM bots LEFT JOIN twitter_stats ON bots.bot_id=twitter_stats.owner_id WHERE bots.owner_id='${m_id}' ORDER BY bots.bot_name`,(err,rs)=>{
                     if(err) throw err; let bots="";
                     if(rs.length){
-                        for(let i =0; i<rs.length; i++){bots+=`<tr><td>${i+1}</td><td>${rs[i].bot_name}</td><td>${rs[i].media_password}</td><td>${rs[i].media_address}</td><td>${rs[i].bot_phone}</td></tr>`;}
-                        res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id,showbtn:showbtn,isAdmin:isAdmin});
+                        for(let i =0; i<rs.length; i++){
+                            let RT =syncSql.mysql(config, `SELECT COUNT(stats_id) AS rt FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE twitter_stats.owner_id='${rs[i].bots_id}' AND twitter_stats.post_type='RT' `).data.rows[0].rt;
+                            let T =syncSql.mysql(config, ` SELECT COUNT(stats_id) AS tw FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE twitter_stats.owner_id='${rs[i].bots_id}' AND twitter_stats.post_type='POST OR COMMENT' `).data.rows[0].tw;
+                            let I =syncSql.mysql(config, ` SELECT SUM(impression) AS impres FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE twitter_stats.owner_id='${rs[i].bots_id}' AND twitter_stats.post_type='POST OR COMMENT' `).data.rows[0].impres;
+                            bots+=`<tr><td>${i+1}</td><td>${rs[i].bot_name}</td><td>${T}</td><td>${RT}</td><td>${I}</td></tr>`;
+                        }
+                        res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id,showbtn:showbtn,isAdmin:isAdmin,numpost:numpost,numrt:numrt,impres:impres,reach:reach});
                     }
-                    else{res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id,showbtn:showbtn,isAdmin:isAdmin});}
+                    else{res.render("profile", {pageTitle:"PROFILE",user_name:req.cookies.userName,m_name:m_name,user_location:m_location,m_pic:m_pic,m_description:m_description,m_phone_number:m_phone_number,m_sec_number:m_sec_number,m_email:m_email,m_type:m_type,bots:bots,userid:m_id,showbtn:showbtn,isAdmin:isAdmin,numpost:numpost,numrt:numrt,impres:impres,reach:reach});}
                 });
             }
             else{ res.render("dashboard", {pageTitle:"DASHBOARD",user_name:req.cookies.userName}); }
@@ -137,21 +171,22 @@ route.get("/socialmedia",isAuth,(req,res)=>{
         if(rs.length){
             for(let i =0; i<rs.length; i++){
                 bots+=`<tr id='tr_${rs[i].bot_id}'>
-                        <td>${i+1}</td> <td>${rs[i].medianame}</td>
-                        <td>${rs[i].bot_name}</td> <td>${rs[i].media_password}</td>
-                        <td>${rs[i].media_address}</td> <td>${rs[i].bot_phone}</td>
-                        <td>${rs[i].m_name}</td>
+                        <td>${i+1}</td> <td>${rs[i].medianame.toUpperCase()}</td>
+                        <td>${rs[i].bot_name.toUpperCase()}</td> 
+                        <td class='copy_pass' data-password='${rs[i].media_password}'>${rs[i].media_password}</td>
+                        <td>${rs[i].m_name.toUpperCase()}</td>
                         <td>
                             <span class="badge badge-danger deletesocial" role='button' data-id='${rs[i].bot_id}' data-myname='${rs[i].bot_name}'>Delete</span>
                             <a href='/edit_bot/${rs[i].bot_id}'><span class="badge badge-success editsocial" role='button'>Edit</span></a>
+                            <a href='/bot_details/${rs[i].bot_id}'><span class="badge badge-secondary editsocial" role='button'>Details</span></a>
                         </td>
                     </tr>`;
             }
-            res.render("media_list",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:"ALL",bots:[bots]});
+            res.render("bots_all",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:"ALL",bots:[bots]});
         }
         else{
             bots=`<tr><td colspan='9' style='text-align:center;'>No details found</td></tr>`;
-            res.render("media_list",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:"ALL",bots:[bots]});
+            res.render("bots_all",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:"ALL",bots:[bots]});
         }
     });
 });
@@ -165,20 +200,49 @@ route.get("/socialmedia/:medianame",isAuth,(req,res)=>{
         if(rs.length){
             for(let i =0; i<rs.length; i++){
                 bots+=`<tr id='tr_${rs[i].bot_id}'>
-                        <td>${i+1}</td><td>${rs[i].medianame}</td><td>${rs[i].bot_name}</td>
-                        <td>${rs[i].media_password}</td><td>${rs[i].media_address}</td>
-                        <td>${rs[i].bot_phone}</td><td>${rs[i].m_name}</td>
+                        <td>${i+1}</td><td>${rs[i].medianame.toUpperCase()}</td>
+                        <td>${rs[i].bot_name.toUpperCase()}</td>
+                        <td  class='copy_pass' data-password='${rs[i].media_password}'>${rs[i].media_password}</td>
+                        <td>${rs[i].m_name.toUpperCase()}</td>
                         <td>
                             <span class="badge badge-danger deletesocial" role='button' data-id='${rs[i].bot_id}' data-myname='${rs[i].bot_name}'>Delete</span>
                             <a href='/edit_bot/${rs[i].bot_id}'><span class="badge badge-success editsocial" role='button'>Edit</span></a>
                         </td>
                     </tr>`;
             }
-            res.render("media_list",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:req.params.medianame.toLocaleUpperCase(),bots:[bots]});
+            res.render("bots_all",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:req.params.medianame.toLocaleUpperCase(),bots:[bots]});
         }
         else{
             bots=`<tr><td colspan='9' style='text-align:center;'>No details found</td></tr>`;
-            res.render("media_list",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:req.params.medianame.toLocaleUpperCase(),bots:[bots]});
+            res.render("bots_all",{pageTitle:"SOCIAL MEDIAS",user_name:req.cookies.userName,medianame:req.params.medianame.toLocaleUpperCase(),bots:[bots]});
+        }
+    });
+});
+
+//view bots deatails
+route.get("/bot_details/:mediaid",isAuth,(req,res)=>{
+    let checker;
+    if(req.cookies.userType=="admin"){checker=`1 AND bots.bot_id='${req.params.mediaid}'`;}
+    else{checker=` bots.owner_id='${req.cookies.userId}' AND bots.bot_id='${req.params.mediaid}' `;}
+
+    conn.query(`SELECT * FROM bots LEFT JOIN base_members ON bots.owner_id=base_members.m_id WHERE ${checker} LIMIT 1`,(err,rs)=>{
+        if(err) throw err; let bots="";
+        if(rs.length){
+            res.render("bot_details",{
+                pageTitle:"Bot DETAILS",
+                user_name:req.cookies.userName, bot_name:rs[0].bot_name.toUpperCase(),bot_user_name:rs[0].handle,
+                medianame:rs[0].medianame, media_address:rs[0].media_address,bot_phone:rs[0].bot_phone,
+                api_key:rs[0].api_key, apisecret:rs[0].apisecret,access_token:rs[0].access_token,
+                access_secret:rs[0].access_secret,baretoken:rs[0].baretoken,media_password:rs[0].media_password,
+                created_by:rs[0].created_by, date_created:rs[0].date_created,description:rs[0].description
+            });
+        }
+        else{
+            res.render("bot_details",{ 
+                pageTitle:"Bot DETAILS", user_name:req.cookies.userName, bot_name:'',bot_user_name:'',
+                medianame:'', media_address:'',bot_phone:'', api_key:'', apisecret:'',access_token:'', access_secret:'',
+                baretoken:'',media_password:'', created_by:'', date_created:'',description:''
+            });
         }
     });
 });
@@ -218,6 +282,37 @@ route.get("/email",isAuth,(req,res)=>{
         else{res.render("forms",{pageTitle:"ADD NEW EMAIL",user_name:req.cookies.userName, form:"newemail",usersoption:["<option value=''>No user found</option>"]});}
     })
 });
+
+//view platform list
+route.get("/platforms",isAuth,(req,res)=>{
+    //get available data from the database
+    conn.query(`SELECT * FROM hub_platform WHERE 1`,(err,p_res)=>{
+        if(err) throw err;let plt="";
+        if(p_res.length){
+            for(let i =0; i<p_res.length; i++){
+                plt=`<tr id='tr_${p_res[i].plat_id}'>
+                        <td>${i+1}</td>
+                        <td>${p_res[i].platform_name}</td>
+                        <td>${p_res[i].number_used}</td>
+                        <td>${p_res[i].email_used}</td>
+                        <td>${p_res[i].password}</td>
+                        <td>
+                            <span class="badge badge-danger delete_platform" role='button' data-pname='${p_res[i].platform_name}' data-id='${p_res[i].plat_id}'>Delete</span>
+                            <a href='platform_edit/${p_res[i].plat_id}'><span class="badge badge-success">Edit</span></a>
+                        </td>
+                    </tr>`;
+            }
+            res.render("platform_list",{pageTitle:"PLATFORM",user_name:req.cookies.userName,medianame:"ALL",platforms:plt});
+        }
+        else{
+            plt=`<tr><td colspan='6' style='text-align:center;'>No details found</td></tr>`;
+            res.render("platform_list",{pageTitle:"PLATFORM",user_name:req.cookies.userName,medianame:"ALL",platforms:plt});
+        }
+    });
+});
+
+//new platforms
+route.get("/new_platform",isAuth,(req,res)=>{res.render("forms",{pageTitle:"ADD NEW PLATFORM", user_name:req.cookies.userName, form:"newplatform" });});
 
 //view email list
 route.get("/email_list",isAuth,(req,res)=>{
@@ -541,6 +636,40 @@ route.get("/media_list",isAuth,(req,res)=>{
         else{
             table_data=`<tr class='tr_item' id="empty_list"><td colspan='2' style='text-align:center;'>No data found</td></tr>`;
             res.render("tonality_medialist",{pageTitle:"MEDIA LIST", user_name:req.cookies.userName, table_data:table_data});
+        }
+    });
+});
+
+route.get("/platform_edit/:platformid", isAuth, (req,res)=>{
+    let platformid=req.params.platformid;
+    conn.query(`SELECT * FROM hub_platform WHERE plat_id='${platformid}'`,(err,resp)=>{
+        if(err) throw err;
+        if(resp.length){
+
+            let platform_name=resp[0].platform_name,plat_id=resp[0].plat_id,number_used=resp[0].number_used,
+            email_used=resp[0].email_used,privilege=resp[0].privilege, password=resp[0].password,description=resp[0].description;
+            res.render("forms",{pageTitle:"EDIT PLATFORM DETAILS",
+                        plat_id:plat_id,platform_name:platform_name, number_used:number_used,email_used:email_used,
+                        privilege:privilege,description:description,password:password,form:"platform_edit"
+                    });
+        }
+        else{ res.render("dashboard", {pageTitle:"DASHBOARD",user_name:req.cookies.userName});}
+    });
+});
+
+route.get("/twitter_stats",isAuth,(req,res)=>{
+    let bots="";
+    //get all bots
+    conn.query(`SELECT * FROM bots WHERE 1`,(err,bots_res)=>{
+        if(err) throw err;
+        if(bots_res.length){
+            for(let i = 0; i<bots_res.length; i++){
+                bots+=`<option value="${bots_res[i].bots_id}" data-uname='${bots_res[i].media_address}' data-pass='${bots_res[i].media_password}'>${bots_res[i].bot_name}</option>`;
+            }
+            res.render("bots_twitter_stats",{pageTitle:"STATISTICS", user_name:req.cookies.userName,bots:bots});
+        }
+        else{
+            res.render("bots_twitter_stats",{pageTitle:"STATISTICS", user_name:req.cookies.userName,bots:bots});
         }
     });
 });

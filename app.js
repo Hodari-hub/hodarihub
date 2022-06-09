@@ -31,10 +31,9 @@ _tables.create_tables();
 
 //start tweet streaming
 bystander.start_the_process();
+
 //retweet from the specific 
 rt_fromspecific.start_process();
-//start listening tweet 
-twitt_listener.start_listening();
 
 //initial core admin
 _new_user.new_user('Deogratius Mabima', 'deogratius@umojasystems.com', '0756935683', '0658913666', 'Upanga', 'No description', 0, '#Ushindi@123','admin');
@@ -53,9 +52,6 @@ app.use(core_route);
 
 //handle all incoming post
 app.use(post_route);
-
-//handle incoming form post
-app.use(express.urlencoded({extended: true}));
 
 //return 404 page
 app.use((req, res)=>{res.status(404).sendFile("./views/404.html",{root: __dirname});});

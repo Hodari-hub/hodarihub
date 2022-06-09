@@ -4,18 +4,14 @@
         <%- include("./partials/sideMenu.ejs"); %>
         <!-- Main content div -->
         <div class="content-wrapper">
+            <div class="p-4">
+                <% if(locals.showbtn==1||locals.isAdmin==1){%> <a href="/edit_user/<%- locals.userid %>" class="btn btn-info">EDIT</a><%}%>
+                <% if(locals.isAdmin){%> <button id="delete_user" data-userid="<%- locals.userid %>" class="btn btn-danger">DELETE</button><%}%>
+            </div>
             <div class="row m-0">
-                <div class="col">
+                <div class="col-6">
                     <div class='py-4 row container-fluid m-auto'>
-                        <div class="col-md-5 m-auto">
-                            <div>
-                                <% if(locals.showbtn==1||locals.isAdmin==1){%>
-                                    <a href="/edit_user/<%- locals.userid %>" class="btn btn-info">EDIT</a>
-                                <%}%>
-                                <% if(locals.isAdmin){%>
-                                    <button id="delete_user" data-userid="<%- locals.userid %>" class="btn btn-danger">DELETE</button>
-                                <%}%>
-                            </div><br>
+                        <div class="col">
                             <!-- Widget: user widget style 2 -->
                             <div class="card card-widget widget-user-2">
                               <!-- Add the bg color to the header using any of the bg-* classes -->
@@ -47,7 +43,7 @@
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
                                         <table class="table m-0">
-                                            <thead><tr><th>ID</th><th>BOTS NAME</th><th>PASSWORD</th><th>EMAIL</th><th>NUMBER</th></tr></thead>
+                                            <thead><tr><th>ID</th><th>BOTS NAME</th><th>TWEETS</th><th>RETWEETS</th><th>IMPRESSION</th></tr></thead>
                                             <tbody>
                                                 <%- locals.bots %>
                                             </tbody>
@@ -57,6 +53,51 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="col-6">
+                    <div class="row py-4">
+
+                        <div class="col-12 col-sm-6 col-md-6">
+                          <div class="info-box">
+                            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-rss"></i></span>
+                            <div class="info-box-content">
+                              <span class="info-box-text">Posts</span>
+                              <span class="info-box-number"> <%- locals.numpost %></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-md-6">
+                          <div class="info-box mb-3">
+                            <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-retweet"></i></span>
+                            <div class="info-box-content">
+                              <span class="info-box-text">Retweets</span>
+                              <span class="info-box-number"><%- locals.numrt %></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="clearfix hidden-md-up"></div>
+                        <div class="col-12 col-sm-6 col-md-6">
+                          <div class="info-box mb-3">
+                            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-eye"></i></span>
+                            <div class="info-box-content">
+                              <span class="info-box-text">Impression</span>
+                              <span class="info-box-number"><%- locals.impres %></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-md-6">
+                          <div class="info-box mb-3">
+                            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-chart-line"></i></span>
+                            <div class="info-box-content"> 
+                                <span class="info-box-text">Reach</span> 
+                                <span class="info-box-number"><%- locals.reach %></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                 </div>
             </div>
         </div>

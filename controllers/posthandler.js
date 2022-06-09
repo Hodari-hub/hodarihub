@@ -477,8 +477,6 @@ post_route.post("/message_trend_server",isAuth,(req,res)=>{
         }
     });
 });
-
-//add social media group
 post_route.post("/social_media_handler",isAuth,(req,res)=>{
     const {social_type,new_social_name} = req.body;
     if(req.cookies.userType!="admin" && req.cookies.userType!="operator"){res.json({code: 0,message:"You need admin/operator privilege to perform this action"}); res.end(); return;}
@@ -501,6 +499,95 @@ post_route.post("/social_media_handler",isAuth,(req,res)=>{
         else{
             res.json({code: 0,message:"An unknown error occurred, and a new media couldn't be saved!"});
             res.end();
+        }
+    });
+});
+
+//add new platform
+post_route.post("/new_platform_handler",isAuth,(req,res)=>{
+    const {platform_name,platform_privilege,platform_address,platform_phone,password,description} = req.body;
+    if(platform_name==""||platform_privilege==""||platform_address==""||platform_phone==""||password==""){  res.json({code: 0,message:"Please fill all the form field!"}); res.end();  return; }
+    conn.query(`INSERT INTO hub_platform SET ?`,
+    {platform_name:platform_name,number_used:platform_phone,email_used:platform_address,privilege:platform_privilege,password:password,description:description,created_by:req.cookies.userId,date_created:new Date().toISOString().slice(0,20)},
+    (plt_err,plt_res)=>{
+        if(plt_err) throw plt_err;
+        if(plt_res.affectedRows){
+            res.json({code: 1,message:"Succesfuly!, new platform details inserted"});
+            res.end();
+        }
+        else{
+            res.json({code: 0,message:"An unknown error occurred, and a new media couldn't be saved!"});
+            res.end();
+        }
+    });
+});
+
+post_route.post("/edit_platform_handler",isAuth,(req,res)=>{
+    const {platform_id,platform_name,platform_privilege,platform_address,platform_phone,password,description} = req.body;
+    conn.query(`UPDATE hub_platform SET platform_name='${platform_name}',privilege='${platform_privilege}',email_used='${platform_address}',number_used='${platform_phone}',password='${password}',description='${description}' WHERE plat_id='${platform_id}'`,(err,resp)=>{
+        if(err) throw err;
+        if(err) {res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end(); return;}
+        if(resp.affectedRows){res.json({code: 1,message:"Succesfuly!, platform details updated"}); res.end();}
+        else{res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end();}
+    });
+});
+
+post_route.post("/delete_platform",isAuth,(req,res)=>{
+    const {platform_id} = req.body;
+    conn.query(`DELETE FROM hub_platform WHERE plat_id='${platform_id}'`,(err,resp)=>{
+        if(err) {res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end(); return;}
+        if(resp.affectedRows){res.json({code: 1,message:"Succesfuly!, data removed from the list"}); res.end();}
+        else{res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end();}
+    });
+});
+
+post_route.post("/add_stats",isAuth,(req,res)=>{
+    const {column,value, post_id} = req.body;
+
+    //check if post exist and update
+    conn.query(`SELECT * FROM twitter_stats WHERE post_id='${post_id}'`,(perr,p_res)=>{
+        if(perr) throw perr;
+        if(p_res.length){
+            conn.query(`UPDATE twitter_stats SET ${column}='${value}' WHERE post_id='${post_id}'`,(err,pres)=>{
+                if(err) throw err;
+                if(pres.affectedRows){
+                    res.json({code: 1,message:"Succesfuly!",pid:post_id}); res.end();
+                }
+            });
+        }
+        else{
+            conn.query(`INSERT INTO twitter_stats SET ?`,{},()=>{});
+        }
+    });
+});
+
+post_route.post("/get_twitts", isAuth, (req,res)=>{
+    const {bot_id,date} = req.body;
+    //get tweets of that days
+    conn.query(`SELECT * FROM twitter_stats WHERE owner_id='${bot_id}' AND date_created='${date}' AND post_type='POST OR COMMENT'`,(err,qres)=>{
+        if(err) throw err;
+        if(qres.length){
+            let result="";
+            for(let i=0; i<qres.length; i++){
+                result+=`<div id="pid_${qres[i].post_id}" class="col-8 mx-auto border py-3 my-3" style="background:rgba(255,255,255,0.1);">
+                            <div>
+                                <button type="button" class='btn btn-outlined secondary wipeout' data-closeid='${qres[i].post_id}'>Close</button>
+                                <a class='btn btn-outlined secondary' href='https://twitter.com/x/status/${qres[i].post_id}' target="_blank">View Post</a>
+                            </div>
+                            <div class="col-12 text py-1">Text: ${qres[i].text} <br/> Tags: ${qres[i].key_word}</div>
+                            <div class="col-12 text py-1">
+                                <button class="btn btn-outline-success datainputs" data-postid="${qres[i].post_id}" data-column="impression">Impression</button>
+                                <button class="btn btn-outline-success datainputs" data-postid="${qres[i].post_id}" data-column="engagement">Engagement</button>
+                                <button class="btn btn-outline-success datainputs" data-postid="${qres[i].post_id}" data-column="reach">Reach</button>
+                                <button class="btn btn-outline-success datainputs" data-postid="${qres[i].post_id}" data-column="expanded">Expanded</button>
+                            </div>
+                        </div>`;
+            }
+
+            res.json({code: 1,message:"Succesfuly!",result:result}); res.end();
+        }
+        else{
+            res.json({code: 0,message:"No result found",result:''}); res.end();
         }
     });
 });

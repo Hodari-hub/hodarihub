@@ -1,0 +1,34 @@
+<div class="row col-6 mx-auto p-4 my-4" style="margin-top: 50px !important;">
+    <form style="width:100%;" class="text-center" id="newPlatform">
+        <div class="form-group">
+            <label for="bots_name">Platform Name</label>
+            <input type="text" id="platform_name" name="platform_name" class="form-control text-center" placeholder="Enter Platform Name">
+        </div>
+        <div class="form-group">
+            <label for="platform_privilege">Access Privilege</label>
+            <select id="platform_privilege" name="platform_privilege" class="form-control text-center">
+                <option value="any" selected>Any One</option> 
+                <option value="only">Only Me</option>
+                <option value="admin">Only Admin</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="media_address">Email Address</label>
+            <input type="email" name="platform_address" id="platform_address" class="form-control text-center" placeholder="Email used on registration if any">
+        </div>
+        <div class="form-group">
+            <label for="bots_phone">Phone Number</label>
+            <input type="tel" name="platform_phone" id="platform_phone" class="form-control text-center" placeholder="Phone Number Used On Registration if any">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" name="password" id="password" class="form-control text-center" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control text-center" name="description" id="description" rows="3" placeholder="Description If any"></textarea>
+        </div>
+        <div style="text-align:center !important;" id="platform_res"></div>
+        <button type="submit" class="btn btn-primary mx-auto">Submit</button>
+    </form>
+</div>

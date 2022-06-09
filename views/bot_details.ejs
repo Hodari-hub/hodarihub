@@ -1,0 +1,44 @@
+<%- include("./partials/headers.ejs"); %>
+    <div class="wrapper">
+        <%- include("./partials/topbar.ejs"); %>
+        <%- include("./partials/sideMenu.ejs"); %>
+        <!-- Main content div -->
+        <div class="content-wrapper">
+            <div class="row m-0">
+                <div class="col-6 mx-auto">
+                    <div class='py-4 row container-fluid m-auto'>
+                        <div class="col">
+                            <!-- Widget: user widget style 2 -->
+                            <div class="card card-widget widget-user-2">
+                                <div class="widget-user-header bg-warning">
+                                    <h3 class="widget-user-username"><%- locals.bot_name %></h3>
+                                    <h5 class="widget-user-desc"><%- locals.bot_user_name %></h5>
+                                </div>
+                                <div class="card-footer p-0">
+                                    <ul class="nav flex-column" style="word-break: break-all;">
+                                        <li class="nav-item p-3">Media Name:&nbsp; <%- locals.medianame %></li>
+                                        <li class="nav-item p-3">Media Address:&nbsp; <%- locals.media_address %></li>
+                                        <li class="nav-item p-3">Phone Used:&nbsp; <%- locals.bot_phone %></li>
+                                        <li class="nav-item p-3">Api Key:&nbsp; <%- locals.api_key %></li>
+                                        <li class="nav-item p-3">Api Secret:&nbsp; <%- locals.apisecret %></li>
+                                        <li class="nav-item p-3">Access Token:&nbsp; <%- locals.access_token %></li>
+                                        <li class="nav-item p-3">Access Secret:&nbsp; <%- locals.access_secret %></li>
+                                        <li class="nav-item p-3">Bare Token:&nbsp; <%- locals.baretoken %></li>
+                                        <li class="nav-item p-3">Media Password:&nbsp; <%- locals.media_password %></li>
+                                        <li class="nav-item p-3">Created By:&nbsp; <%- locals.created_by %></li>
+                                        <li class="nav-item p-3">Date Created:&nbsp; <%- locals.date_created %></li>
+                                        <li class="nav-item p-3">Description:&nbsp;</li>
+                                    </ul>
+                                    <p class="p-3"><%- locals.descriptionn %></p>
+                                </div>
+                            </div>
+                            <!-- /.widget-user -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- middle footer -->
+        <%- include("./partials/middle_footer.ejs"); %>
+    </div>
+<%- include("./partials/footer.ejs"); %>

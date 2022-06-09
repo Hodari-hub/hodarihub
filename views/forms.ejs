@@ -23,6 +23,10 @@
             <%- include("./forms/newkeyword_form.ejs"); %>
           <%} else if(locals.form=="listener"){%>
             <%- include("./forms/specific_retweet_form.ejs"); %>
+          <%} else if(locals.form=="newplatform"){%>
+            <%- include("./forms/new_platform.ejs"); %>
+          <%} else if(locals.form=="platform_edit"){%>
+            <%- include("./forms/edit_Platform_details.ejs"); %>
           <%}%>
         </div>
     </div>

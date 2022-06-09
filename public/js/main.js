@@ -497,3 +497,138 @@ $("#new_social_group").submit(function(e){
         }
     });
 });
+
+//media bot
+$("#media_bots").on("click",".copy_pass", function(){
+    let pass=$(this).data("password");
+    navigator.clipboard.writeText(pass);
+    alert("password is coppied!");
+});
+
+//new platform
+$("#newPlatform").submit(function(e){
+    e.preventDefault(); let form = $(this); 
+    $("#platform_res").html(`<em>Processing..</em>`);
+    $.ajax({
+        type:'POST',url:'/new_platform_handler',
+        data:form.serialize(),success:function(rs){
+            form.trigger("reset");$("#platform_res").html(``);
+            if(rs.code==1){Swal.fire('SUCCESS', `${rs.message}`,'success');}
+            else{Swal.fire('Error', `${rs.message}`,'warning');}
+        }
+    });
+});
+
+//edit platform
+$("#edit_Platform").submit(function(e){
+    e.preventDefault(); let form = $(this); 
+    $("#platform_res").html(`<em>Processing..</em>`);
+    $.ajax({
+        type:'POST',url:'/edit_platform_handler',
+        data:form.serialize(),success:function(rs){
+            form.trigger("reset");$("#platform_res").html(``);
+            if(rs.code==1){
+
+                Swal.fire({title: '',text: `${rs.message}`, icon: 'success',showCancelButton: false, confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Ok'})
+                    .then((result) => {if(result.isConfirmed) {window.location='/platforms'}});
+            
+            }
+            else{Swal.fire('Error', `${rs.message}`,'warning');}
+        }
+    });
+});
+
+//delete platform
+$("body").on('click','.delete_platform',function(){
+    let platform_id=$(this).data("id");
+    let name=$(this).data("pname");
+    Swal.fire({
+        title: 'Are you sure?',html: `You want to delete <strong style='color:#e64033;'>${name}</strong> from platform list`, icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Yes, delete!'
+    })
+    .then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type:"POST",url:"/delete_platform", data:{platform_id:platform_id},
+                success:function(rs){
+                    if(rs.code==1){Swal.fire('SUCCESS', `${rs.message}`,'success'); $(`#tr_${platform_id}`).fadeOut(1000); setTimeout(()=>{$(`#tr_${platform_id}`).remove();},1200);}
+                    else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+                }
+            });
+        }
+    });
+});
+
+$("#get_statistic").click(function(){
+    let  user_names,start_date,end_date,type;
+    user_names=$("#user_names").val(); start_date=$("#start_date").val();
+    end_date=$("#end_date").val(); type=$("#type").val();
+    $.ajax({
+        type:"POST",url:"/get_twitter_stats", data:{user_names:user_names,start_date:start_date,end_date:end_date,type:type},
+        success:function(rs){
+            alert(rs);
+            if(rs.code==1){
+                Swal.fire('SUCCESS', `${rs.message}`,'success'); 
+                $(`#tr_${platform_id}`).fadeOut(1000); setTimeout(()=>{$(`#tr_${platform_id}`).remove();},1200);
+            }
+            else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+        }
+    });
+});
+
+
+$("body").on('click','.datainputs',function(){
+    let pid=$(this).data("postid");
+    let column=$(this).data("column");
+    Swal.fire({
+        title: 'IMPRESSION',
+        html: `<input type="number" id="impression" class="swal2-input" placeholder="Enter number of impression">`,
+        confirmButtonText: 'Add Impression',focusConfirm: false,
+        preConfirm: () => {
+            let impression = Swal.getPopup().querySelector('#impression').value;
+            if (!impression) {Swal.showValidationMessage(`Suppy number of impression!`);}
+            return {impression:impression }
+        }
+    })
+    .then((result) => {
+        if(result.isConfirmed){
+            alert(result.value.impression)
+            $.ajax({
+                type:"POST",url:"/add_stats", data:{column:column,post_id:pid,value:result.value.impression},
+                success:function(rs){
+                    if(rs.code==1){
+                        $(`#pid_${rs.pid}`).fadeOut();
+                        Swal.fire({title: '',html: rs.message,icon: 'success',confirmButtonText: 'Ok'});
+                    }
+                    else{Swal.fire({title: '',text: rs.message,icon: 'info',confirmButtonText: 'Ok'});}
+                }
+            });
+        }
+    });
+});
+
+$("#user_names").change(function(){
+    let uname = $(this).find(':selected').data('uname');
+    let pass = $(this).find(':selected').data('pass');
+    $("#uname").html(uname);
+    $("#pass").html(pass);
+});
+
+//get search result
+$("#get_statistic").click(function(){
+    let user_names = $("#user_names").val();
+    let start_date = $("#start_date").val();
+    $.ajax({
+        type:"POST",url:"./get_twitts",data:{bot_id:user_names,date:start_date},
+        success:function(res){
+            $("#twets_result").html(res.result);
+        }
+    });
+});
+
+$("body").on('click','.wipeout',function(){
+    let closeid=$(this).data("closeid");
+    if($(`#pid_${closeid}`).remove()){
+        Swal.fire({title: '',html: "Element removed!",icon: 'success',confirmButtonText: 'Ok'});
+    }
+});

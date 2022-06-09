@@ -77,17 +77,34 @@ var create_tables=()=>{
         )`,function (error, result) {if (error) throw error;});
 
         //update bots table insert new column
-        conn.query(`ALTER TABLE bots ADD COLUMN IF NOT EXISTS bots_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+        //conn.query(`ALTER TABLE bots ADD COLUMN IF NOT EXISTS bots_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+        conn.query(`ALTER TABLE bots ADD COLUMN IF NOT EXISTS handle VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;}); 
+        
         //create twitter stats table
         conn.query(`CREATE TABLE IF NOT EXISTS twitter_stats(
-            stats_id INT(11) NOT NULL AUTO_INCREMENT,owner_id INT(11) NOT NULL, 
-            post_type VARCHAR(255) NOT NULL, post_id INT(11) NOT NULL,
-            impression INT(11) NOT NULL, engagement INT(11) NOT NULL, 
-            detailed_expand INT(11) NOT NULL, followers INT(11) NOT NULL, 
-            profile_views INT NOT NULL, retweets INT NOT NULL,key_word TEXT NOT NULL,
-            replies INT NOT NULL, likes INT NOT NULL,quotes INT NOT NULL,
-            date_created DATETIME NULL, PRIMARY KEY(stats_id)
+            stats_id INT(11) NOT NULL AUTO_INCREMENT,owner_id VARCHAR(255) NOT NULL, 
+            post_type VARCHAR(255) NOT NULL, post_id VARCHAR(255) NOT NULL,
+            impression VARCHAR(255) NOT NULL, engagement VARCHAR(255) NOT NULL, 
+            detailed_expand VARCHAR(255) NOT NULL, followers VARCHAR(255) NOT NULL, 
+            profile_views VARCHAR(255) NOT NULL, retweets VARCHAR(255) NOT NULL,key_word TEXT NOT NULL,
+            replies VARCHAR(255) NOT NULL, likes VARCHAR(255) NOT NULL,quotes VARCHAR(255) NOT NULL,
+            text LONGTEXT NOT NULL,date_created DATE NULL, PRIMARY KEY(stats_id)
         )`,function (error, result) {if (error) throw error;});
+        
+        conn.query(`CREATE TABLE IF NOT EXISTS hub_platform(
+            plat_id INT(11) NOT NULL AUTO_INCREMENT, platform_name TEXT NOT NULL, 
+            number_used VARCHAR(255) NOT NULL, email_used VARCHAR(255) NOT NULL,
+            privilege ENUM('any','only','admin') NOT NULL,
+            password TEXT NOT NULL, description TEXT NOT NULL, created_by INT(11) NOT NULL,
+            date_created DATETIME NULL, PRIMARY KEY(plat_id)
+        )`,function (error, result) {if (error) throw error;});
+
+        //do some editions
+        conn.query(`ALTER TABLE twitter_stats MODIFY COLUMN date_created DATE`,function(error, result){if (error) throw error;});
+        conn.query(`ALTER TABLE twitter_stats CHANGE post_id post_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+        conn.query(`ALTER TABLE twitter_stats CHANGE owner_id owner_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+        conn.query(`ALTER TABLE twitter_stats ADD COLUMN IF NOT EXISTS reach INT(11) NOT NULL`,function(error, result){if (error) throw error;});
+
         
 }
 
