@@ -559,23 +559,6 @@ $("body").on('click','.delete_platform',function(){
     });
 });
 
-$("#get_statistic").click(function(){
-    let  user_names,start_date,end_date,type;
-    user_names=$("#user_names").val(); start_date=$("#start_date").val();
-    end_date=$("#end_date").val(); type=$("#type").val();
-    $.ajax({
-        type:"POST",url:"/get_twitter_stats", data:{user_names:user_names,start_date:start_date,end_date:end_date,type:type},
-        success:function(rs){
-            alert(rs);
-            if(rs.code==1){
-                Swal.fire('SUCCESS', `${rs.message}`,'success'); 
-                $(`#tr_${platform_id}`).fadeOut(1000); setTimeout(()=>{$(`#tr_${platform_id}`).remove();},1200);
-            }
-            else{ Swal.fire('Error', `${rs.message}`,'warning'); }
-        }
-    });
-});
-
 
 $("body").on('click','.datainputs',function(){
     let pid=$(this).data("postid");
@@ -621,14 +604,107 @@ $("#get_statistic").click(function(){
     $.ajax({
         type:"POST",url:"./get_twitts",data:{bot_id:user_names,date:start_date},
         success:function(res){
+            alert(res);
             $("#twets_result").html(res.result);
         }
     });
 });
+
+/* $("#get_statistic").click(function(){
+    let  user_names,start_date,end_date,type;
+    user_names=$("#user_names").val(); start_date=$("#start_date").val();
+    end_date=$("#end_date").val(); type=$("#type").val();
+    $.ajax({
+        type:"POST",url:"./get_twitts", data:{user_names:user_names,start_date:start_date,end_date:end_date,type:type},
+        success:function(rs){
+            alert(rs);
+            if(rs.code==1){
+                Swal.fire('SUCCESS', `${rs.message}`,'success'); 
+                $(`#tr_${platform_id}`).fadeOut(1000); setTimeout(()=>{$(`#tr_${platform_id}`).remove();},1200);
+            }
+            else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+        }
+    });
+}); */
 
 $("body").on('click','.wipeout',function(){
     let closeid=$(this).data("closeid");
     if($(`#pid_${closeid}`).remove()){
         Swal.fire({title: '',html: "Element removed!",icon: 'success',confirmButtonText: 'Ok'});
     }
+});
+
+$("body").on('submit','#new_member_tonolity',function(e){
+    e.preventDefault();
+    let form = $(this);
+    $.ajax({
+        type:"POST",url:"/tonality_new_member",
+        data:form.serialize(),
+        success:function(res){
+            if(res.code){
+                Swal.fire('SUCCESS', `${rs.message}`,'success'); 
+                let ele_num=$("#tonality_member").find("tr").length;
+                $("#tonality_member").append(`<tr class='tr' id='tr_${res.mid}'>
+                                            <td>${ele_num+1}</td> <td>${res.member_name}</td>
+                                            <td>
+                                                <span class="badge badge-danger delete_member" role='button' data-mname='${res.member_name}' data-id='${res.mid}'>Delete</span>
+                                                <span class="badge badge-primary reset_password" role='button' data-mname='${res.member_name}' data-id='${res.mid}'>Reseat Password</span>
+                                            </td>
+                                        </tr>`);
+            }
+            else{
+                Swal.fire('ERROR', `${rs.message}`,'error'); 
+            }
+        }
+    });
+});
+
+$("body").on('click','.delete_member',function(){
+    let trid=$(this).data("id");
+    let mname=$(this).data("mname");
+    Swal.fire({
+        title: 'Are you sure?',html: `You want to delete <strong style='color:#e64033;'>${mname}</strong> from member list`, icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Yes, delete!'
+    })
+    .then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type:"POST",url:"/delete_tone_member", data:{member_id:trid},
+                success:function(rs){
+                    if(rs.code==1){Swal.fire('SUCCESS', `${rs.message}`,'success'); $(`#tr_${trid}`).fadeOut(1000); setTimeout(()=>{$(`#tr_${trid}`).remove();},1200);}
+                    else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+                }
+            });
+        }
+    });
+});
+
+
+
+$("body").on('click','.reset_password',function(){
+    let trid=$(this).data("id");
+    let mname=$(this).data("mname");
+    Swal.fire({
+        title: 'RESET PASSWORD',
+        html: `<input type="text" id="new_pass" class="swal2-input" placeholder="Enter new password">`,
+        confirmButtonText: 'CHANGE PASSWORD',focusConfirm: false,
+        preConfirm: () => {
+            let new_pass = Swal.getPopup().querySelector('#new_pass').value;
+            if (!new_pass) {Swal.showValidationMessage(`Suppy new password!`);}
+            return {new_pass:new_pass}
+        }
+    })
+    .then((result) => {
+        if(result.isConfirmed){
+            $.ajax({
+                type:"POST",url:"/reset_tone_pass", data:{mname:mname,memberid:trid,new_pass:result.value.new_pass},
+                success:function(rs){
+                    if(rs.code==1){
+                        Swal.fire({title: '',html: rs.message,icon: 'success',confirmButtonText: 'Ok'});
+                    }
+                    else{Swal.fire({title: '',text: rs.message,icon: 'info',confirmButtonText: 'Ok'});}
+                }
+            });
+        }
+    });
 });

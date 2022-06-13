@@ -38,7 +38,8 @@ function getPostNum(userid){
                                 WHERE base_members.m_id='${userid}' AND twitter_stats.post_type='POST OR COMMENT'
                             `);
 
-    return checkpost.data.rows[0].numpost;
+    if(checkpost.data.fields){ return checkpost.data.rows[0].numpost; }
+    else{ return 0; }
 }
 function getRetweets(userid){
     var checkRt = syncSql.mysql(config, `
@@ -47,8 +48,8 @@ function getRetweets(userid){
                                 LEFT JOIN base_members ON base_members.m_id=bots.owner_id
                                 WHERE base_members.m_id='${userid}' AND twitter_stats.post_type='RT'
                             `);
-                        
-    return checkRt.data.rows[0].rt;
+    if(checkRt.data.fields){ return checkRt.data.rows[0].rt; }
+    else{ return 0; }
 }
 
 //handle dashboard accessor
@@ -119,10 +120,14 @@ route.get("/profile/:id",isAuth,(req,res)=>{
                 let showbtn=0,isAdmin=0; if(req.cookies.userId==m_id){ showbtn=1;}else{ showbtn=0;}
                 if(req.cookies.userType=="admin"){isAdmin=1;}else{isAdmin=0;}
 
-                numpost=syncSql.mysql(config, `SELECT COUNT(stats_id) AS numpost FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`).data.rows[0].numpost;
-                numrt=syncSql.mysql(config, `SELECT COUNT(stats_id) AS numrt FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='RT'`).data.rows[0].numrt;
-                impres=syncSql.mysql(config, `SELECT SUM(impression) AS impres FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`).data.rows[0].impres;
-                reach=syncSql.mysql(config, `SELECT SUM(reach) AS reach FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`).data.rows[0].reach;
+                numpost=syncSql.mysql(config, `SELECT COUNT(stats_id) AS numpost FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`);
+                if(numpost.data.rows.length){numpost=numpost.data.rows[0].numpost;}
+                numrt=syncSql.mysql(config, `SELECT COUNT(stats_id) AS numrt FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='RT'`);
+                if(numrt.data.rows.length){numrt=numrt.data.rows[0].numrt;}
+                impres=syncSql.mysql(config, `SELECT SUM(impression) AS impres FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`);
+                if(impres.data.rows.length){impres=impres.data.rows[0].impres;}
+                reach=syncSql.mysql(config, `SELECT SUM(reach) AS reach FROM twitter_stats  LEFT JOIN bots ON  twitter_stats.owner_id=bots.bots_id WHERE bots.owner_id='${m_id}' AND twitter_stats.post_type='POST OR COMMENT'`);
+                if(reach.data.rows.length){reach=reach.data.rows[0].reach;}
 
                 //get all bots owned by this user
                 conn.query(`SELECT * FROM bots LEFT JOIN twitter_stats ON bots.bot_id=twitter_stats.owner_id WHERE bots.owner_id='${m_id}' ORDER BY bots.bot_name`,(err,rs)=>{
@@ -314,6 +319,24 @@ route.get("/platforms",isAuth,(req,res)=>{
 //new platforms
 route.get("/new_platform",isAuth,(req,res)=>{res.render("forms",{pageTitle:"ADD NEW PLATFORM", user_name:req.cookies.userName, form:"newplatform" });});
 
+//view email details
+route.get("/email_details/:email_id",isAuth,(req,res)=>{
+    //get detail by using email id
+    conn.query(`SELECT * FROM emails WHERE mail_id='${req.params.email_id}' LIMIT 1`,(err,q_res)=>{
+        if(err) throw err;
+        if(q_res.length){
+            res.render("email_details", {
+                pageTitle:"Email Details",user_name:req.cookies.userName,f_name:q_res[0].f_name,mailtype:q_res[0].mailtype,
+                mail_address:q_res[0].mail_address, secondary_address:q_res[0].primary_address,mail_phone:q_res[0].mail_phone,
+                password:q_res[0].password,date_created:q_res[0].date_created
+            });
+        }
+        else{
+            res.render("email_details", {pageTitle:"Email Details",user_name:req.cookies.userName});
+        }
+    });
+});
+
 //view email list
 route.get("/email_list",isAuth,(req,res)=>{
     let checker;
@@ -322,12 +345,12 @@ route.get("/email_list",isAuth,(req,res)=>{
         if(err) throw err; let emails="";
         if(rs.length){
             for(let i =0; i<rs.length; i++){
-                emails+=`<tr id='tr_${rs[i].mail_id}'><td>${i+1}</td><td>${rs[i].f_name}</td><td>${rs[i].mailtype}</td>
-                            <td>${rs[i].mail_address}</td><td>${rs[i].primary_address}</td>
-                            <td>${rs[i].mail_phone}</td><td>${rs[i].password}</td><td>${rs[i].m_name}</td>
+                emails+=`<tr id='tr_${rs[i].mail_id}'><td>${i+1}</td>
+                            <td>${rs[i].mail_address}</td><td>${rs[i].password}</td><td>${rs[i].primary_address}</td>
                             <td>
                                 <span class="badge badge-danger delete_emails" role='button' data-mname='${rs[i].mail_address}' data-id='${rs[i].mail_id}'>Delete</span>
                                 <a href='mail_edit/${rs[i].mail_id}'><span class="badge badge-success editemail">Edit</span></a>
+                                <a href='email_details/${rs[i].mail_id}'><span class="badge badge-secondary">Details</span></a>
                             </td>
                         </tr>`;
             }
@@ -670,6 +693,29 @@ route.get("/twitter_stats",isAuth,(req,res)=>{
         }
         else{
             res.render("bots_twitter_stats",{pageTitle:"STATISTICS", user_name:req.cookies.userName,bots:bots});
+        }
+    });
+});
+
+//tonality member
+route.get("/tonality_member",isAuth,(req,res)=>{
+    conn.query(`SELECT * FROM tonality_members WHERE 1 `,(err,q_res)=>{
+        if(err) throw err;
+        if(q_res.length){
+            let tone_member="";
+            for(let i=0; i<q_res.length; i++){
+                tone_member+=`<tr class='tr' id='tr_${q_res[i].tonality_mem_id}'>
+                                <td>${i+1}</td> <td>${q_res[i].tonality_mem_name}</td>
+                                <td>
+                                    <span class="badge badge-danger delete_member" role='button' data-mname='${q_res[i].tonality_mem_name}' data-id='${q_res[i].tonality_mem_id}'>Delete</span>
+                                    <span class="badge badge-primary reset_password" role='button' data-mname='${q_res[i].tonality_mem_name}' data-id='${q_res[i].tonality_mem_id}'>Reseat Password</span>
+                                </td>
+                            </tr>`;
+            }
+            res.render("tonality_member",{pageTitle:"TONALITY MEMBER", user_name:req.cookies.userName,tone_member:tone_member});
+        }
+        else{
+            res.render("tonality_member",{pageTitle:"TONALITY MEMBER", user_name:req.cookies.userName,tone_member:tone_member});
         }
     });
 });

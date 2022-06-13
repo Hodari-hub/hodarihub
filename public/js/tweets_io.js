@@ -67,3 +67,7 @@ $("body").on("click","#listen_to", function(){
     $("#twets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty"><em>Processing...</em></div>`);
     socket.emit("keyword",{new_key:keyword[0]});
 });
+
+//stop streaming
+$("body").on("click","#stop_streaming", function(){ let keyword=$("#keyword_id").val().split("-"); socket.emit("stop_streaming",{current_stream:keyword[0]});});
+socket.on("streaming_stoped", function(data){$("#twets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty">${data.message}</div>`);});

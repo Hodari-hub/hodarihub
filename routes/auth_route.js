@@ -17,7 +17,9 @@ reg_route.post('/login',async (req,res)=>{
                 res.json({code: 1,message:"Succesfuly logged in"});
                 res.end();
             }
-            else{res.json({code: 0,message:"Login failed!"});res.end();}
+            else{
+                res.json({code: 0,message:"Login failed!"});res.end();
+            }
         });
     }
 });

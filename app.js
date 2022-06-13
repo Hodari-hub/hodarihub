@@ -13,6 +13,7 @@ const tone_counter=require("./controllers/tone_counter");
 const socket= require("socket.io");
 const needle = require('needle');
 const twitt_listener=require("./controllers/twit_listener");
+const temp_listener=require("./controllers/temporary");
 
 //SOCKET HANDLER
 const io_rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
@@ -115,6 +116,11 @@ io.on("connection",(sockets)=>{
         initialize_rules(bare,data.new_key);
         io.sockets.emit("streaming_started",{message:`<em>Streaming on '<strong>${data.new_key}</strong>' keyword has started just wait for the response!</em>`});
     });
-    
+    sockets.on("stop_streaming", async(data)=>{
+        let currentRules = await getRules(bare);
+        if(deleteRules(bare,currentRules)){
+            io.sockets.emit("streaming_stoped",{message:`<em>Streaming on <strong style='color:#ffc107;'>${data.current_stream}</strong> keyword has stoped successfully!</em>`});
+        }
+    });
 });
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

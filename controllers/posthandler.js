@@ -592,4 +592,53 @@ post_route.post("/get_twitts", isAuth, (req,res)=>{
     });
 });
 
+post_route.post("/tonality_new_member",isAuth,(req,res)=>{
+    let {member_name,password} = req.body;
+
+    if(member_name==""||password==""){
+        res.json({code: 0,message:"Please supply value in the form field!",member_name:member_name}); 
+        res.end();
+    }
+
+    conn.query(`INSERT INTO tonality_members SET ?`,
+    {tonality_mem_name:member_name,tonality_mem_password:password,createdby:req.cookies.userId,date_created: new Date().toISOString().slice(0,10)},
+    (err,q_res)=>{
+        if(err) throw err;
+        if(q_res.affectedRows){
+            let mid=q_res.insertId;
+            res.json({code: 1,message:"Succesfuly!",member_name:member_name,mid:mid}); 
+            res.end();
+        }
+        else{
+            res.json({code: 0,message:"Something went wrong! try agin later",member_name:member_name}); 
+            res.end();
+        }
+    });
+});
+
+post_route.post("/delete_tone_member",isAuth,(req,res)=>{
+    const {member_id} = req.body;
+    conn.query(`DELETE FROM tonality_members WHERE tonality_mem_id='${member_id}'`,(err,resp)=>{
+        if(err) {res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end(); return;}
+        if(resp.affectedRows){res.json({code: 1,message:"Succesfuly!, data removed from the list"}); res.end();}
+        else{res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end();}
+    });
+});
+
+post_route.post("/reset_tone_pass",isAuth,(req,res)=>{
+    const {mname,memberid,new_pass} = req.body;
+    let hashpassword = bcrypt.hashSync(new_pass, 8);
+    conn.query(`UPDATE tonality_members SET tonality_mem_password='${hashpassword}' WHERE tonality_mem_id='${memberid}'`,(err,q_res)=>{
+        if(err) throw err;
+        if(q_res.affectedRows){
+            res.json({code: 1,message:"Succesfuly!",member_name:mname}); 
+            res.end();
+        }
+        else{
+            res.json({code: 0,message:"Something went wrong! try agin later",member_name:mname}); 
+            res.end();
+        }
+    });
+});
+
 module.exports= post_route;

@@ -1,7 +1,7 @@
 const conn=require("../modals/connection");
 var create_tables=()=>{
     
-    //here we save all member details in the database
+    /* //here we save all member details in the database
     conn.query(`CREATE TABLE IF NOT EXISTS base_members(
                 m_id INT(11) NOT NULL AUTO_INCREMENT, m_pic TEXT NULL, 
                 m_name TEXT NOT NULL,m_location TEXT NOT NULL,m_description TEXT NOT NULL,
@@ -104,7 +104,16 @@ var create_tables=()=>{
         conn.query(`ALTER TABLE twitter_stats CHANGE post_id post_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
         conn.query(`ALTER TABLE twitter_stats CHANGE owner_id owner_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
         conn.query(`ALTER TABLE twitter_stats ADD COLUMN IF NOT EXISTS reach INT(11) NOT NULL`,function(error, result){if (error) throw error;});
+    */
 
+    conn.query(`CREATE TABLE IF NOT EXISTS tonality_members(
+        tonality_mem_id INT(11) NOT NULL AUTO_INCREMENT,
+        tonality_mem_name TEXT NOT NULL,
+        tonality_mem_password VARCHAR(255) NOT NULL,
+        createdby INT(11) NOT NULL,
+        date_created DATETIME NULL,
+        PRIMARY KEY(tonality_mem_id)
+    )`,function (error, result) {if (error) throw error;});
         
 }
 

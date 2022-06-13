@@ -31,11 +31,11 @@ var retweet=(rt_Id,consumerKey,consumerSecret,accessToken,accessSecret)=>{
 
 // Delete stream rules
 async function deleteRules(BareToken,previusrule) {
-    if (!Array.isArray(previusrule.data)) {return null}
-    const ids = previusrule.data.map((rule) => rule.id);
-    const data = {delete: {ids: ids,},}
-    const response = await needle('post', rulesURL, data, {headers: {'content-type': 'application/json',Authorization: `Bearer ${BareToken}`,},});
-    return response.body
+  if (!Array.isArray(previusrule.data)) {return null}
+  const ids = previusrule.data.map((rule) => rule.id);
+  const data = {delete: {ids: ids,},}
+  const response = await needle('post', rulesURL, data, {headers: {'content-type': 'application/json',Authorization: `Bearer ${BareToken}`,},});
+  return response.body
 }
 
 function streamTweets(APIKey,APISecrete,Atoken,Tsecrete,BareToken) {

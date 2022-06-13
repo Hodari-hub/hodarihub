@@ -10,6 +10,10 @@ $("form#loginform").submit(function(e){
                 $("form#loginform").find("input[type=text], input[type=file],textarea").val('');
                 window.location="/dashboard";
             }
+            else{
+                $("#login_res").html(`<em class='clr_fuiler'>${rs.message}</em>`);
+                setTimeout(()=>{$("#login_res").html(``);},2000);
+            }
         }
     });
 });

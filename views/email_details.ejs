@@ -1,0 +1,34 @@
+<%- include("./partials/headers.ejs"); %>
+    <div class="wrapper">
+        <%- include("./partials/topbar.ejs"); %>
+        <%- include("./partials/sideMenu.ejs"); %>
+        <!-- Main content div -->
+        <div class="content-wrapper">
+            <div class="row m-0">
+                <div class="col-6 mx-auto">
+                    <div class='py-4 row container-fluid m-auto'>
+                        <div class="col">
+                            <!-- Widget: user widget style 2 -->
+                            <div class="card card-widget widget-user-2">
+                                <div class="card-footer p-0">
+                                    <ul class="nav flex-column" style="word-break: break-all;">
+                                        <li class="nav-item p-3">Full Name:&nbsp; <%- locals.user_name %></li>
+                                        <li class="nav-item p-3">Email Address:&nbsp; <%- locals.mail_address %></li>
+                                        <li class="nav-item p-3">Phone Used:&nbsp; <%- locals.mail_phone %></li>
+                                        <li class="nav-item p-3">Password:&nbsp; <%- locals.password %></li>
+                                        <li class="nav-item p-3">Secondary Email:&nbsp; <%- locals.secondary_address %></li>
+                                        <li class="nav-item p-3">Email Type:&nbsp; <%- locals.mailtype %></li>
+                                    </ul>
+                                    <p class="p-3"><%- locals.email_description %></p>
+                                </div>
+                            </div>
+                            <!-- /.widget-user -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- middle footer -->
+        <%- include("./partials/middle_footer.ejs"); %>
+    </div>
+<%- include("./partials/footer.ejs"); %>
