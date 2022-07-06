@@ -1,8 +1,8 @@
 var socket=io.connect("http://localhost:3000/");
 socket.on("Tweet",function(data){
-    $("#twets").find("#empty").fadeOut();
+    $("#tweets").find("#empty").fadeOut();
     if(data.includes.hasOwnProperty('media')){
-        $("#twets").append(`<div class="border rounded col-9 col-lg-6 mx-auto row p-1 my-3" id="twt_${data.data.id}">
+        $("#tweets").append(`<div class="border rounded col-9 col-lg-6 mx-auto row p-1 my-3" id="twt_${data.data.id}">
                     <div class="col-2 profilepic">
                     <img src="/static/images/user.png" alt="avatar" style="width:50px;height:50px;" srcset="${data.includes.users[0].profile_image_url}">
                 </div>
@@ -27,7 +27,7 @@ socket.on("Tweet",function(data){
             </div>`);
     }
     else{
-        $("#twets").append(`<div class="border rounded col-9 col-lg-6 mx-auto row p-1 my-3" id="twt_${data.data.id}">
+        $("#tweets").append(`<div class="border rounded col-9 col-lg-6 mx-auto row p-1 my-3" id="twt_${data.data.id}">
                     <div class="col-2 profilepic">
                     <img src="/static/images/user.png" alt="avatar" style="width:50px;height:50px;" srcset="${data.includes.users[0].profile_image_url}">
                 </div>
@@ -52,22 +52,22 @@ socket.on("Tweet",function(data){
     }
 });
 
-socket.on("handshakes", function(data){$("#twets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty">${data.message}</div>`);});
-socket.on("streaming_started", function(data){$("#twets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty">${data.message}</div>`);});
+socket.on("handshakes", function(data){$("#tweets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty">${data.message}</div>`);});
+socket.on("streaming_started", function(data){$("#tweets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty">${data.message}</div>`);});
 socket.on("tonefeedback", function(data){ $(`#${data.type}`).html(Number($(`#${data.type}`).html())+1); $(`#twt_${data.content_id}`).fadeOut(); });
 
 //save the positive btn
-$("#twets").on("click",".iobtn",function(){
+$("#tweets").on("click",".iobtn",function(){
     let type=$(this).data("type"),contanteid=$(this).data("content"),keysid=1;
     socket.emit("tone",{type:type,contanteid:contanteid,keyid:keysid});
 });
 
 $("body").on("click","#listen_to", function(){
     let keyword=$("#keyword_id").val().split("-");
-    $("#twets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty"><em>Processing...</em></div>`);
+    $("#tweets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty"><em>Processing...</em></div>`);
     socket.emit("keyword",{new_key:keyword[0]});
 });
 
 //stop streaming
 $("body").on("click","#stop_streaming", function(){ let keyword=$("#keyword_id").val().split("-"); socket.emit("stop_streaming",{current_stream:keyword[0]});});
-socket.on("streaming_stoped", function(data){$("#twets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty">${data.message}</div>`);});
+socket.on("streaming_stoped", function(data){$("#tweets").html(`<div class=" rounded col-9 col-lg-6 mx-auto row p-1 my-3" style="text-align:center !important;" id="empty">${data.message}</div>`);});

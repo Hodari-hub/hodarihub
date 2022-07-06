@@ -24,12 +24,10 @@ async function getTweets(BareToken,botid,next_token) {
   let day= myDate.getDate();
   if(day <= 9){day = '0'+day;}
   let today = `${year}-${month}-${day}`;
-  let start_time="2022-06-04";
-  //&end_time=${today}T00:00:00Z
 
   if(next_token!=""){next_token=`&pagination_token=${next_token}`}
 
-  const bothTweetandRetweet=`https://api.twitter.com/2/users/${botid}/tweets?exclude=replies&max_results=100&start_time=${today}T00:00:00Z&expansions=author_id,referenced_tweets.id,referenced_tweets.id.author_id,entities.mentions.username,in_reply_to_user_id,attachments.media_keys&tweet.fields=attachments,author_id,id,text,withheld,entities,public_metrics&place.fields=geo&media.fields=preview_image_url,type,url${next_token}`;
+  const bothTweetandRetweet=`https://api.twitter.com/2/users/${botid}/tweets?max_results=100&start_time=${today}T00:00:00Z&end_time=${today}T23:59:59Z&expansions=author_id,referenced_tweets.id,referenced_tweets.id.author_id,entities.mentions.username,in_reply_to_user_id,attachments.media_keys&tweet.fields=attachments,author_id,id,text,withheld,entities,public_metrics&place.fields=geo&media.fields=preview_image_url,type,url${next_token}`;
   const bothTR = await needle('get', bothTweetandRetweet, { headers: {Authorization: `Bearer ${BareToken}`,},});
 
   //check if there is a meta object 
@@ -42,28 +40,35 @@ async function getTweets(BareToken,botid,next_token) {
 
   //loop through result and find rt and tweet and if contain tags we want
   for(let i =0; i<bothTR.body.meta.result_count; i++){
+    let getIncludes=bothTR.body.includes;
     let data=bothTR.body.data[i];
     let isMamaYukoKazin=data.text.toLowerCase().includes('#mamayukokazini');
-    let isSamiaSuluhu=data.text.toLowerCase().includes('samia suluhu hassan');
+    let isSamiaSuluhuHassan=data.text.toLowerCase().includes('samia suluhu hassan');
+    let isSamiaSuluhu=data.text.toLowerCase().includes('samia suluhu');
     let isAuthorMember=bots_id.includes(data.author_id);
-    let isRetweet=false,ptype="POST OR COMMENT";
+    let isRetweet=false,ptype="POST";
     let twitt_text=data.text;
 
     //check is retweet or not
     if(data.text.substring(0,2).toString()=="RT"){
+      let pr_id=getIncludes.tweets.findIndex(obj=>{ return obj.id === bothTR.body.data[i].referenced_tweets[0].id; });
       isRetweet=true;ptype="RT"
-      isMamaYukoKazin=bothTR.body.includes.tweets[0].text.toLowerCase().includes('#mamayukokazini');
-      isSamiaSuluhu=bothTR.body.includes.tweets[0].text.toLowerCase().includes('samia suluhu hassan');
-      twitt_text=bothTR.body.includes.tweets[0].text;
+      isMamaYukoKazin=getIncludes.tweets[pr_id].text.toLowerCase().includes('#mamayukokazini');
+      isSamiaSuluhuHassan=getIncludes.tweets[pr_id].text.toLowerCase().includes('samia suluhu hassan');
+      isSamiaSuluhu=getIncludes.tweets[pr_id].text.toLowerCase().includes('samia suluhu');
+      twitt_text=getIncludes.tweets[pr_id].text;
     }
+
+    //check if this is the post
+    if("in_reply_to_user_id" in bothTR.body.data[i]){ptype="REPLY";}
 
     //check which keyword is carried from the tweet
     if(isMamaYukoKazin&&!isSamiaSuluhu){keyword='#mamayukokazini';}
     else if(!isMamaYukoKazin&&isSamiaSuluhu){keyword='samia suluhu hassan';}
-    else{keyword='samia suluhu hassan  #mamayukokazini';}
+    else{keyword='samia suluhu';}
 
     //check if the text contain our keywords and the author is ours
-    if((isMamaYukoKazin == true || isSamiaSuluhu == true)&&isAuthorMember){
+    if((isMamaYukoKazin == true || isSamiaSuluhu == true || isSamiaSuluhuHassan==true)&&isAuthorMember){
       conn.query(`SELECT * FROM twitter_stats WHERE post_id='${data.id}'`,(er,rs)=>{
         if(er) throw er;
         if(!rs.length){
@@ -71,25 +76,14 @@ async function getTweets(BareToken,botid,next_token) {
             owner_id:data.author_id,post_type:ptype,post_id:data.id,key_word:keyword,impression:0,engagement:0,
             detailed_expand:0,followers:0,profile_views:0,retweets:data.public_metrics.retweet_count,
             replies:data.public_metrics.reply_count,likes:data.public_metrics.like_count,text:twitt_text,
-            quotes:data.public_metrics.quote_count,date_created:new Date().toISOString().slice(0, 20)
+            quotes:data.public_metrics.quote_count,date_created:date,reach:0
           }, 
-          function(error, results) {
-                if(error) {console.log(`${error}`);}
-                else{}
-          });
+          function(error, results) { if(error) {console.log(`This error come from twitter listerner lines number 83: ${error}`);} });
         }
       });
     }
   }
 }
-
-//get conversation
-/*async function getCovo(BareToken) {
-  console.log("wait for the user tweets");
-  const url=`https://api.twitter.com/2/tweets/search/recent?query=conversation_id:1532452464120807430&max_results=100`; 
-  const response = await needle('get', url, { headers: {Authorization: `Bearer ${BareToken}`,},})
-  console.log(response.body);
-} 3600000*/
 
 //endless watching man
 let check_status = setInterval(() => { for(let i=0; i<bots_id.length; i++){  getTweets(baretoken,bots_id[i],''); }},60000);

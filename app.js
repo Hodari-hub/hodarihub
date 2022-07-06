@@ -7,13 +7,13 @@ const auth_route=require("./routes/auth_route");
 const core_route=require("./routes/core_route");
 const post_route=require("./controllers/posthandler");
 const cookieParser = require('cookie-parser');
-const bystander=require("./controllers/bystanders");
+const rt_automation=require("./controllers/rt_automation_controller");
 const rt_fromspecific=require("./controllers/retweet_from_specific");
 const tone_counter=require("./controllers/tone_counter");
 const socket= require("socket.io");
 const needle = require('needle');
 const twitt_listener=require("./controllers/twit_listener");
-const temp_listener=require("./controllers/temporary");
+const influensor_listener=require("./controllers/influencers_tracker");
 
 //SOCKET HANDLER
 const io_rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
@@ -31,7 +31,7 @@ app.use(cookieParser());
 _tables.create_tables();
 
 //start tweet streaming
-bystander.start_the_process();
+rt_automation.start_the_process();
 
 //retweet from the specific 
 rt_fromspecific.start_process();
@@ -56,7 +56,6 @@ app.use(post_route);
 
 //return 404 page
 app.use((req, res)=>{res.status(404).sendFile("./views/404.html",{root: __dirname});});
-
 
 //MANAGE SOCKET FUNCTIONAL
 const  io=socket(server);
@@ -112,10 +111,12 @@ let bare="AAAAAAAAAAAAAAAAAAAAAPs3UwEAAAAA4A8wV5DdD0sKMqeYYaYyJ00%2Bc3U%3D1xyvw5
 io.on("connection",(sockets)=>{
     io.sockets.emit("handshakes",{message:"<em>You have successfully connected to the server, select key word to stream</em>"});
     sockets.on("tone",(data)=>{if(tone_counter.savetone(data.contanteid,data.type,data.keyid)){io.sockets.emit("tonefeedback",{content_id:data.contanteid, type:data.type});}});
+    
     sockets.on("keyword",(data)=>{
         initialize_rules(bare,data.new_key);
         io.sockets.emit("streaming_started",{message:`<em>Streaming on '<strong>${data.new_key}</strong>' keyword has started just wait for the response!</em>`});
     });
+
     sockets.on("stop_streaming", async(data)=>{
         let currentRules = await getRules(bare);
         if(deleteRules(bare,currentRules)){

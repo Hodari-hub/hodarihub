@@ -72,7 +72,7 @@ var create_tables=()=>{
             t_id INT(11) NOT NULL AUTO_INCREMENT,u_id INT(11) NOT NULL, 
             media_type VARCHAR(255) NOT NULL, page_id INT(11) NOT NULL,
             link VARCHAR(255) NOT NULL, positive VARCHAR(255) NOT NULL, negative VARCHAR(255) NOT NULL, 
-            neautral VARCHAR(255) NOT NULL,unrelated VARCHAR(255) NOT NULL, total INT NOT NULL,
+            neutral VARCHAR(255) NOT NULL,unrelated VARCHAR(255) NOT NULL, total INT NOT NULL,
             date_created DATETIME NULL, PRIMARY KEY(t_id)
         )`,function (error, result) {if (error) throw error;});
 
@@ -90,7 +90,7 @@ var create_tables=()=>{
             replies VARCHAR(255) NOT NULL, likes VARCHAR(255) NOT NULL,quotes VARCHAR(255) NOT NULL,
             text LONGTEXT NOT NULL,date_created DATE NULL, PRIMARY KEY(stats_id)
         )`,function (error, result) {if (error) throw error;});
-        
+
         conn.query(`CREATE TABLE IF NOT EXISTS hub_platform(
             plat_id INT(11) NOT NULL AUTO_INCREMENT, platform_name TEXT NOT NULL, 
             number_used VARCHAR(255) NOT NULL, email_used VARCHAR(255) NOT NULL,
@@ -104,16 +104,42 @@ var create_tables=()=>{
         conn.query(`ALTER TABLE twitter_stats CHANGE post_id post_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
         conn.query(`ALTER TABLE twitter_stats CHANGE owner_id owner_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
         conn.query(`ALTER TABLE twitter_stats ADD COLUMN IF NOT EXISTS reach INT(11) NOT NULL`,function(error, result){if (error) throw error;});
+
+        conn.query(`ALTER TABLE influencers_stats MODIFY COLUMN date_created DATE`,function(error, result){if (error) throw error;});
+        conn.query(`ALTER TABLE influencers_stats CHANGE post_id post_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+        conn.query(`ALTER TABLE influencers_stats CHANGE owner_id owner_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+        conn.query(`ALTER TABLE influencers_stats ADD COLUMN IF NOT EXISTS reach INT(11) NOT NULL`,function(error, result){if (error) throw error;});
     */
 
-    conn.query(`CREATE TABLE IF NOT EXISTS tonality_members(
-        tonality_mem_id INT(11) NOT NULL AUTO_INCREMENT,
-        tonality_mem_name TEXT NOT NULL,
-        tonality_mem_password VARCHAR(255) NOT NULL,
-        createdby INT(11) NOT NULL,
-        date_created DATETIME NULL,
-        PRIMARY KEY(tonality_mem_id)
+    //influencers_stats table
+    conn.query(`CREATE TABLE IF NOT EXISTS influencers_stats (
+        stats_id INT(11) NOT NULL AUTO_INCREMENT,owner_id VARCHAR(255) NOT NULL, 
+        post_type VARCHAR(255) NOT NULL, post_id VARCHAR(255) NOT NULL,
+        impression VARCHAR(255) NOT NULL, engagement VARCHAR(255) NOT NULL, 
+        detailed_expand VARCHAR(255) NOT NULL, followers VARCHAR(255) NOT NULL, 
+        profile_views VARCHAR(255) NOT NULL, retweets VARCHAR(255) NOT NULL,key_word TEXT NOT NULL,
+        replies VARCHAR(255) NOT NULL, likes VARCHAR(255) NOT NULL,quotes VARCHAR(255) NOT NULL,
+        text LONGTEXT NOT NULL,date_created DATE NULL, PRIMARY KEY(stats_id)
     )`,function (error, result) {if (error) throw error;});
+
+    conn.query(`ALTER TABLE influencers_stats MODIFY COLUMN date_created DATE`,function(error, result){if (error) throw error;});
+    conn.query(`ALTER TABLE influencers_stats CHANGE post_id post_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+    conn.query(`ALTER TABLE influencers_stats CHANGE owner_id owner_id VARCHAR(255) NOT NULL`,function(error, result){if (error) throw error;});
+    conn.query(`ALTER TABLE influencers_stats ADD COLUMN IF NOT EXISTS reach INT(11) NOT NULL`,function(error, result){if (error) throw error;});
+
+    conn.query(`CREATE TABLE IF NOT EXISTS tonality_members(
+        tonality_mem_id INT(11) NOT NULL AUTO_INCREMENT, member_id INT(11) NOT NULL,
+        createdby INT(11) NOT NULL,date_created DATETIME NULL, PRIMARY KEY(tonality_mem_id)
+    )`,function (error, result) {if (error) throw error;});
+
+    conn.query(`CREATE TABLE IF NOT EXISTS twitter_temp_tone(
+                    temp_tone_id INT(11) NOT NULL AUTO_INCREMENT, tonality_mem_id INT(11) NOT NULL,
+                    media_name VARCHAR(255) NOT NULL,page_name VARCHAR(255) NOT NULL, caption VARCHAR(255) NOT NULL,
+                    post_id VARCHAR(255) NOT NULL, positive VARCHAR(255) NOT NULL,
+                    negative VARCHAR(255) NOT NULL,  neutral VARCHAR(255) NOT NULL,
+                    unrelated VARCHAR(255) NOT NULL, date_created DATE NULL, 
+                    PRIMARY KEY(temp_tone_id)
+                )`,function (error, result) {if (error) throw error;});
         
 }
 

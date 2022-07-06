@@ -4,28 +4,32 @@
         <%- include("./partials/sideMenu.ejs"); %>
         <!-- Main content div -->
         <div class="content-wrapper">
-            <div class="p-4 row m-0">
-              <div class="col">
+            <div class="p-4 row m-0 text-center">
+              <div class="col-12 col-md-3 my-2">
                 <% if(locals.showbtn==1||locals.isAdmin==1){%> <a href="/edit_user/<%- locals.userid %>" class="btn btn-info">EDIT</a><%}%>
                 <% if(locals.isAdmin){%> <button id="delete_user" data-userid="<%- locals.userid %>" class="btn btn-danger">DELETE</button><%}%>
               </div>
-              <div class="col">
-                <input type="date" name="start_date" id="start_date" class="form-control text-center" required>
+              <div class="col-12 col-md-3 my-2">
+                <input type="hidden" name="uid" id="uid" value="<%- locals.userid %>">
+                <input type="date" name="start_date" id="start_date" class="form-control text-center">
               </div>
-              <div class="col">
-                <input type="date" name="start_date" id="start_date" class="form-control text-center" required>
+              <div class="col-12 col-md-3 my-2">
+                <input type="date" name="end_date" id="end_date" class="form-control text-center">
               </div>
-              <div class="col">
-                <select id="utype" name="utype" class="form-control text-center" required>
-                  <option value="twitter">Twitter</option>
+              <div class="col-12 col-md-2 my-2">
+                <select id="platform" name="platform" class="form-control text-center">
+                  <option value="twitter" selected>Twitter</option>
                   <option value="facebook">FaceBook</option>
                   <option value="instagram">Instagram</option>
                   <option value="youtube">YouTube</option>
                 </select>
               </div>
+              <div class="col-12 col-md-1 my-2">
+                <button class="btn btn-outline-secondary" type="button" id="get_data">GET DATA</button>
+              </div>
             </div>
             <div class="row m-0">
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class='py-4 row container-fluid m-auto'>
                         <div class="col">
                             <!-- Widget: user widget style 2 -->
@@ -41,10 +45,10 @@
                               </div>
                               <div class="card-footer p-0">
                                 <ul class="nav flex-column">
-                                  <li class="nav-item p-3"> Home Address:&nbsp; <%- locals.user_location %></li>
-                                  <li class="nav-item p-3"> Phone Number:&nbsp; <%- locals.m_phone_number %></li>
-                                  <li class="nav-item p-3"> Phone Number:&nbsp; <%- locals.m_sec_number %></li>
-                                  <li class="nav-item p-3"> Email Address:&nbsp; <%- locals.m_email %></li>
+                                  <li class="nav-item p-3"> Address:&nbsp; <%- locals.user_location %></li>
+                                  <li class="nav-item p-3"> Phone 1:&nbsp; <%- locals.m_phone_number %></li>
+                                  <li class="nav-item p-3"> Phone 2:&nbsp; <%- locals.m_sec_number %></li>
+                                  <li class="nav-item p-3"> Email:&nbsp; <%- locals.m_email %></li>
                                 </ul>
                                 <p class="p-3"><%- locals.m_description %></p>
                               </div>
@@ -70,7 +74,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="row py-4">
 
                         <div class="col-12 col-sm-6 col-md-6">
@@ -78,7 +82,7 @@
                             <span class="info-box-icon bg-info elevation-1"><i class="fas fa-rss"></i></span>
                             <div class="info-box-content">
                               <span class="info-box-text">Posts</span>
-                              <span class="info-box-number"> <%- locals.numpost %></span>
+                              <span class="info-box-number" id="post_result"> <%- locals.numpost %></span>
                             </div>
                           </div>
                         </div>
@@ -88,7 +92,7 @@
                             <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-retweet"></i></span>
                             <div class="info-box-content">
                               <span class="info-box-text">Retweets</span>
-                              <span class="info-box-number"><%- locals.numrt %></span>
+                              <span class="info-box-number" id="retweet_result"><%- locals.numrt %></span>
                             </div>
                           </div>
                         </div>
@@ -99,7 +103,7 @@
                             <span class="info-box-icon bg-success elevation-1"><i class="fas fa-eye"></i></span>
                             <div class="info-box-content">
                               <span class="info-box-text">Impression</span>
-                              <span class="info-box-number"><%- locals.impres %></span>
+                              <span class="info-box-number" id="impression_result"><%- locals.impres %></span>
                             </div>
                           </div>
                         </div>
@@ -109,7 +113,7 @@
                             <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-chart-line"></i></span>
                             <div class="info-box-content"> 
                                 <span class="info-box-text">Reach</span> 
-                                <span class="info-box-number"><%- locals.reach %></span>
+                                <span class="info-box-number" id="reach_result"><%- locals.reach %></span>
                             </div>
                           </div>
                         </div>

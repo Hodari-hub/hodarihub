@@ -1,0 +1,38 @@
+<%- include("./partials/headers.ejs"); %>
+  <div class="wrapper">
+    <%- include("./partials/topbar.ejs"); %>
+    <%- include("./partials/sideMenu.ejs"); %>
+    <!-- Main content div -->
+      <div class='content-wrapper'>
+        <div class="container p-3 row col-9 mx-auto">
+          <div class="input-group col-6">
+            <select class="custom-select" id="keyword_id">
+              <%- locals.words %>
+            </select>
+            <div class="input-group-append">
+              <button id="listen_to" class="btn btn-outline-secondary" type="button">LISTERN</button>
+            </div>
+          </div>
+          <button class="btn btn-outline-secondary" type="button" id="stop_streaming">STOP</button>&nbsp;
+          <a href="/new_tone_keyword" class="btn btn-outline-secondary">NEW KEY</a>&nbsp;
+          <button class="btn btn-outline-secondary" type="button" id="delete_tone_counter_keyword">DELETE KEY</button>
+        </div>
+        <div class="row m-0">
+          <div class="col-8 py-4 m-0" id="tweets"></div>
+            <div class="col-4">
+              <ul class="list-group sticky-top my-4">
+                <li class="list-group-item">Positive: <span id="positive">0</span></li>
+                <li class="list-group-item">Negative: <span id="negative">0</span></li>
+                <li class="list-group-item">Neutral: <span id="neutral">0</span></li>
+                <li class="list-group-item">Unrelated: <span id="unrelated">0</span></li>
+              </ul>
+            </div>
+        </div>
+      </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js" integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> 
+    <!-- middle footer -->
+    <%- include("./partials/middle_footer.ejs"); %>
+  </div>
+<%- include("./partials/footer.ejs"); %>

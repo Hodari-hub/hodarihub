@@ -40,9 +40,12 @@ function streamTweets(APIKey,APISecrete,Atoken,Tsecrete,BareToken,from_author) {
     try {
       if(data){
         const json = JSON.parse(data);
-        if(json.data.author_id==from_author){retweet(json.data.id,APIKey,APISecrete,Atoken,Tsecrete);}
+        let isRt= json.data.text.substring(0,2).toString()=="RT"; let isReply= "in_reply_to_user_id" in json.data;
+        if(json.data.author_id==from_author){if(!isReply && !isRt){retweet(json.data.id,APIKey,APISecrete,Atoken,Tsecrete);}}
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(`This is the error on line no 47/ rewteet_from_specific.js : ${error}`);
+    }
   });
   return stream;
 }

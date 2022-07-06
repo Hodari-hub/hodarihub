@@ -1,0 +1,42 @@
+<%- include("./partials/headers.ejs"); %>
+  <div class="wrapper">
+    <%- include("./partials/topbar.ejs"); %>
+    <%- include("./partials/sideMenu.ejs"); %>
+    <!-- Main content div -->
+      <div class='content-wrapper'>
+        <div class="container p-3 row col-8 mx-auto">
+            <div class="input-group col-8 mx-auto">
+                <div class="input-group-append">
+                    <input type="text" name="page_name" class="form-control" id="page_name" placeholder="Page Name">
+                    <input type="text" name="postcaption" class="form-control" id="postcaption" placeholder="Pest Tweet Caption">
+                    <input type="text" name="postid" class="form-control" id="postid" placeholder="Pest Tweet Id">
+                    <input type="hidden" name="loadmore" id="loadmore_input">
+                    <input type="hidden" name="mem_id" id="mem_id" value="2">
+                    <input type="hidden" name="item_id" id="item_id">
+                </div>&nbsp;
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary form-control get_twitt_statistic" type="button">GET</button>
+                </div>
+            </div>
+        </div>
+        <div class="row m-0 mx-auto">
+            <div class="row col-9 mx-auto">
+                <div class="col-12 py-4 mx-auto" id="results"></div>
+                <div class="col-12 py-4 mx-auto text-center" id="loadbtn_div"><button class="btn btn-outline-primary get_twitt_statistic">Load More</button></div>
+            </div>
+            <div class="col-3">
+                <ul class="list-group sticky-top my-4">
+                  <li class="list-group-item">Positive: <span id="positive">0</span></li>
+                  <li class="list-group-item">Negative: <span id="negative">0</span></li>
+                  <li class="list-group-item">Neutral: <span id="neutral">0</span></li>
+                  <li class="list-group-item">Unrelated: <span id="unrelated">0</span></li>
+                </ul>
+              </div>
+        </div>
+      </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js" integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> 
+    <!-- middle footer -->
+    <%- include("./partials/middle_footer.ejs"); %>
+  </div>
+<%- include("./partials/footer.ejs"); %>

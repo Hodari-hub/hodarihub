@@ -22,10 +22,13 @@
   },
   "homepage": "https://github.com/Hodari-hub/hodarihub#readme",
   "dependencies": {
+    "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
+    "csv-writer": "^1.6.0",
     "ejs": "^3.1.8",
     "express": "^4.18.1",
+    "googleapis": "^103.0.0",
     "mysql": "^2.18.1",
     "needle": "^3.1.0",
     "socket.io": "^4.5.1",

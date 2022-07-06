@@ -8,7 +8,7 @@ $("form#loginform").submit(function(e){
             if(rs.code==1){
                 $("#login_res").html(`<em class='clr_success'>Success Logged In wait..</em>`);
                 $("form#loginform").find("input[type=text], input[type=file],textarea").val('');
-                window.location="/dashboard";
+                window.location=rs.url;
             }
             else{
                 $("#login_res").html(`<em class='clr_fuiler'>${rs.message}</em>`);
