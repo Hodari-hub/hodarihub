@@ -4,11 +4,10 @@
     <%- include("./partials/sideMenu.ejs"); %>
     <!-- Main content div -->
     <div class='content-wrapper'>
-        <div class='container m-auto py-3'>
+          <div class='container m-auto py-3'>
             <div class="container p-0 py-4">
                 <form id="dataSearch_social_message">
                     <div class="row">
-                        <input type="hidden" id="socialname" name="socialname">
                         <div class="col-12 col-sm-12 col-md-5 my-1"><input type="date" class="form-control" id="from" name="from"></div>
                         <div class="col-12 col-sm-12 col-md-5 my-1"><input type="date" class="form-control" id="to" name="to"></div>
                         <div class="col-12 col-sm-12 col-md-2 mx-auto my-1"><button class="btn btn-primary">View Data</button></div>
@@ -36,7 +35,8 @@
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="col-12 col-sm-12 col-md-2 mx-auto my-2"><button class="btn btn-primary" id="download_messages_csv"><i class="fa fa-download" aria-hidden="true"></i> DOWNLOAD CSV</button></div>
+          </div>
     </div>
 
     <!-- pop up the form for entering phone number-->

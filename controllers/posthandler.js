@@ -14,7 +14,7 @@ const fs=require("fs");
 const axios = require("axios");
 const youtube_apiUrl = "https://www.googleapis.com/youtube/v3";
 const youtube_apiKey="AIzaSyDZZ6VYHGOYYnqM0E_GdipJU_qFENnW88U";
-//guselya ngwandu credentials
+//george mlawa bare tocken
 let baretoken='AAAAAAAAAAAAAAAAAAAAAPs3UwEAAAAA4A8wV5DdD0sKMqeYYaYyJ00%2Bc3U%3D1xyvw5zev4IRhfQXX17PAh84FtJbJiRXuyDwwZPicpFkQH9WWX';
 
 
@@ -243,11 +243,15 @@ post_route.post("/delete_automate_key",isAuth,(req,res)=>{
 
 post_route.post("/delete_tone_counter_keyword",isAuth,(req,res)=>{
     const {keyword_id} = req.body;
-    conn.query(`DELETE FROM daily_tone WHERE key_id='${keyword_id}'`,(err,resp)=>{
-        if(err){res.json({code: 0,message:err}); res.end(); return;};
-        if(resp.affectedRows){res.json({code: 1,userid:req.cookies.userId,message:"Succesfuly!, listener deleted"}); res.end();}
-        else{res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end();}
+    conn.query(`DELETE FROM daily_tonality WHERE key_id='${keyword_id}'`,(err_1,resp_1)=>{
+        if(err_1){res.json({code: 0,message:err_1}); res.end(); return;};
+        conn.query(`DELETE FROM daily_tone WHERE key_id='${keyword_id}'`,(err,resp)=>{
+            if(err){res.json({code: 0,message:err}); res.end(); return;};
+            if(resp.affectedRows){res.json({code: 1,userid:req.cookies.userId,message:"Succesfuly!, listener deleted"}); res.end();}
+            else{res.json({code: 0,message:"Unknown error occurred, listener couldn't be deleted!"}); res.end();}
+        });
     });
+    
 });
 
 post_route.post("/new_keyword",isAuth,(req,res)=>{
@@ -268,13 +272,12 @@ post_route.post("/new_keyword",isAuth,(req,res)=>{
     });
 });
 
+//retweet from the specific user
 post_route.post("/rt_from_specific_listener",isAuth,(req,res)=>{
     const {listener_bot, author_id,nkyw,from_name} = req.body;
     conn.query(`INSERT INTO retweet_from_specific SET ?`,{user_id:req.cookies.userId,bot_id:listener_bot,from_author_id: author_id,keyword:nkyw,from_author_name:from_name,date_created:new Date().toISOString().slice(0, 20)}, 
     function(error, results) {
-
         if(error) { res.json({code: 0,message:error}); res.end(); return; }
-
         if(results.affectedRows){
             rt_fromspecific.start_process();
             res.json({code: 1,message:"Succesfuly!, new keyword inserted"});
@@ -287,6 +290,7 @@ post_route.post("/rt_from_specific_listener",isAuth,(req,res)=>{
     });
 });
 
+//delete keyword
 post_route.post("/delete_rt_keywords",isAuth,(req,res)=>{
     const {keyword_id} = req.body;
     conn.query(`DELETE FROM retweet_from_specific WHERE ky_id='${keyword_id}'`,(err,resp)=>{
@@ -296,72 +300,176 @@ post_route.post("/delete_rt_keywords",isAuth,(req,res)=>{
     });
 });
 
-//handle the request 
+//insfluencers tweets and retweets tracker
 post_route.post("/influencers_tracker", isAuth, async (req,res)=>{
+    //get the data body
     const {pageid,from,to} = req.body;
-    let baretoken='AAAAAAAAAAAAAAAAAAAAAHg3UwEAAAAALIWXzb7cRDnaVmSzkznsTX8sWSc%3DOWsm5AEuS7X2ML9imWo7z50YsINcOg3bTDkpbUQMadtuMtRQ05';
-    let check=await influencers_tracker.getInfluencersStats(baretoken,pageid,'',from,to);
-    if(check){
-        conn.query(`SELECT * FROM influencers_stats WHERE owner_id='${pageid}' AND date_created>='${from}' AND  date_created<='${to}'`,(er,re_q)=>{
-            if(er) throw err;
-            let datas="";
-            if(re_q.length){
+    let datas="";
 
-                for(let i =0; i<re_q.length; i++){
-                    datas+=`<tr class='tr_data' id='tr_${re_q[i].stats_id}'> <td>${re_q[i].date_created.toISOString().slice(0, 10)}</td> <td>${re_q[i].text}</td>
-                                    <td>${re_q[i].retweets}</td> <td>${re_q[i].replies}</td> <td>${re_q[i].likes}</td>
-                                    <td>${re_q[i].quotes}</td>
-                                </tr>`;
-                }
+    //possible error handling
+    if(from==""||to==""||pageid==""){res.json({code: 0,data:`<tr id="inf_respose"><td class="text-center" colspan="4"><em style='background:red;padding:10px;'>All the form input are required</em></td><td></td></tr>`,tweet_num:0,rt_num:0,replie_num:0}); res.end(); return;}
+    
+    //run online fetch user post from twitter
+    let isThereAnyData=await influencers_tracker.getInfluencersStats(pageid,'',from,to);
 
-                let tweets_num=syncSql.mysql(config,`SELECT COUNT(stats_id) AS tweets_num FROM influencers_stats  WHERE post_type='POST' AND date_created>='${from}' AND  date_created<='${to}'`).data.rows[0].tweets_num;
-                let retweets_num=syncSql.mysql(config,`SELECT COUNT(stats_id) AS retweets_num FROM influencers_stats  WHERE post_type='RT' AND date_created>='${from}' AND  date_created<='${to}'`).data.rows[0].retweets_num;
-                let replies_num=syncSql.mysql(config,`SELECT COUNT(stats_id) AS replies_num FROM influencers_stats  WHERE post_type='REPLY' AND date_created>='${from}' AND  date_created<='${to}'`).data.rows[0].replies_num;
+    if(isThereAnyData == false){
 
-                res.json({code: 1,data:datas,tweet_num:tweets_num,rt_num:retweets_num,replie_num:replies_num}); 
-                res.end();
+        //send back requested
+        res.json({code: 0,data:`<tr id="inf_respose"><td class="text-center" colspan="4"><em style='background:red;padding:10px;'>Something went wrong, tracker function</em></td><td></td></tr>`,tweet_num:0,rt_num:0,replie_num:0}); 
+        res.end(); return;
+    }
+    else{
+
+        //if check return any value then run the sql command to insert new data
+        conn.query(`SELECT * FROM influencers_stats WHERE owner_id='${pageid}' AND date_created>='${from}' AND  date_created<='${to}'`,(req_er,re_q)=>{
+            if(req_er){
+
+                //send back requested
+                res.json({code: 0,data:`<tr id="inf_respose"><td class="text-center" colspan="4"><em style='background:red;padding:10px;'>${req_er}</em></td><td></td></tr>`,tweet_num:0,rt_num:0,replie_num:0}); 
+                res.end(); return;
             }
             else{
-                res.json({code: 0,data:`<tr id="inf_respose"><td class="text-center" colspan="5"><em>No data found yet</em></td><td></td></tr>`,tweet_num:0,rt_num:0,replie_num:0}); 
-                res.end();
+                
+                if(re_q.length){
+
+                    //loop through the result 
+                    for(let i =0; i<re_q.length; i++){
+                        datas+=`<tr style='cursor:pointer;' class='tr_data viewTweet' id='tr_${re_q[i].stats_id}' data-target='https://twitter.com/x/status/${re_q[i].post_id}'> 
+                                    <td>${re_q[i].date_created.toISOString().slice(0, 10)}</td> <td>${re_q[i].text}</td>
+                                    <td>${re_q[i].retweets}</td> <td>${re_q[i].replies}</td><td>${re_q[i].quotes}</td>
+                                </tr>`;
+                    }
+
+                    //get the number of retweet, tweet, and replies
+                    let tweets_num=syncSql.mysql(config,`SELECT COUNT(stats_id) AS tweets_num FROM influencers_stats  WHERE post_type='POST' AND date_created>='${from}' AND  date_created<='${to}' AND owner_id='${pageid}'`).data.rows[0].tweets_num;
+                    let retweets_num=syncSql.mysql(config,`SELECT COUNT(stats_id) AS retweets_num FROM influencers_stats  WHERE post_type='RT' AND date_created>='${from}' AND  date_created<='${to}' AND owner_id='${pageid}'`).data.rows[0].retweets_num;
+                    let replies_num=syncSql.mysql(config,`SELECT COUNT(stats_id) AS replies_num FROM influencers_stats  WHERE post_type='REPLY' AND date_created>='${from}' AND  date_created<='${to}' AND owner_id='${pageid}'`).data.rows[0].replies_num;
+
+                    //send back the response
+                    res.json({code: 1,data:datas,tweet_num:tweets_num,rt_num:retweets_num,replie_num:replies_num}); 
+                    res.end();
+                }
+                else{
+
+                    //send back the response
+                    res.json({code: 0,data:`<tr id="inf_respose"><td class="text-center" colspan="4"><em style='background:red;padding:10px;'>No data found yet</em></td><td></td></tr>`,tweet_num:0,rt_num:0,replie_num:0}); 
+                    res.end();
+                }
             }
         });
     }
 });
 
-//csv download file handling
+//CSV file downloading
 post_route.post("/get_Influencers_Csv",isAuth,(req,res)=>{
+
+    //handling request
     const {from_date,to_date,pageid} = req.body;
-    let hedaz=[{id: 'date', title: 'DATE'}, {id: 'caption', title: 'CAPTION'},{id: 'type', title: 'TYPE'}, {id: 'retweet', title: 'RETWEET'},{id: 'replies', title: 'REPLIES'}, {id: 'likes', title: 'LIKES'}, {id: 'quotes', title: 'QUOTES'}];
+
+    //prepare dataz header and bodyz 
+    let hedaz=[{id: 'date', title: 'DATE'}, {id: 'caption', title: 'CAPTION'},{id: 'type', title: 'TYPE'}, {id: 'link', title: 'LINK'}, {id: 'retweet', title: 'RETWEET'},{id: 'replies', title: 'REPLIES'}, {id: 'likes', title: 'LIKES'}, {id: 'quotes', title: 'QUOTES'}];
     let dataz=[]; 
+
+    //handling influencers statistics
     conn.query(`SELECT * FROM influencers_stats WHERE owner_id='${pageid}' AND date_created>='${from_date}' AND  date_created<='${to_date}'`,(err,q_res)=>{
-        if(err) throw err;
-        if(q_res.length){
-            for(let i=0; i<q_res.length; i++){
-                 dataz.push(
-                    {
-                        date: q_res[i].date_created.toISOString().slice(0, 10),
-                        caption:q_res[i].text, type:q_res[i].post_type,retweet:q_res[i].retweets,
-                        replies:q_res[i].replies, likes:q_res[i].likes, quotes:q_res[i].quotes
-                    }
-                ); 
-            }
-            let dir=__dirname.split('\\');
-            var timestamp = new Date().getTime();
-            let fname=`influencers_stats_${timestamp}.csv`;
-            let filename = `${dir[0]}/${dir[1]}/downloads/influencers_stats_${timestamp}.csv`;
-            const csvWriter = createCsvWriter({path: filename,header: hedaz});
-            csvWriter.writeRecords(dataz).then(() => { return true; });
-            res.json({code: 1,message:"Succesfuly!, find option from the list",filename:fname});
-            res.end();
+        if(err){
+
+            //send back requested
+            res.json({code: 0,message:err});  res.end();
         }
         else{
-            res.json({code: 0,message:"Failed!, could not find option from the list"});
-            res.end();
+            if(q_res.length){
+
+                //loop through result and push data to the body array
+                for(let i=0; i<q_res.length; i++){
+                     dataz.push(
+                        {
+                            date: q_res[i].date_created.toISOString().slice(0, 10),
+                            caption:q_res[i].text, type:q_res[i].post_type,link: `https://twitter.com/x/status/${q_res[i].post_id}`,
+                            retweet:q_res[i].retweets, replies:q_res[i].replies, likes:q_res[i].likes, quotes:q_res[i].quotes
+                        }
+                    ); 
+                }
+
+                //prepare files for download
+                let dir=__dirname.split('\\');
+                var timestamp = new Date().getTime();
+                let fname=`influencers_stats_${timestamp}.csv`;
+
+                //let online_path_prefix=`/${dir[1]}/${dir[2]}/${dir[3]}`;
+                let local_path_prefix=`${dir[0]}/${dir[1]}`;
+                let filename = `${local_path_prefix}/downloads/influencers_stats_${timestamp}.csv`;
+                const csvWriter = createCsvWriter({path: filename,header: hedaz});
+                csvWriter.writeRecords(dataz).then(() => { return true; });
+
+                //send back the response 
+                res.json({code: 1,message:"Succesfuly!, find option from the list",filename:fname});
+                res.end();
+            }
+            else{
+
+                //send back the response
+                res.json({code: 0,message:"Failed!, could not find option from the list"});
+                res.end();
+            }
         }
     });
 });
 
+//download searched data from 
+post_route.post("/get_dailtonality_csv",isAuth,(req,res)=>{
+
+    //handling request
+    const {from,to,keyword_id} = req.body;
+    let search;
+
+    //prepare dataz header and body 
+    let hedaz=[{id: 'date', title: 'DATE'}, {id: 'keyword', title: 'KEY WORD'}, {id: 'positive', title: 'POSITIVE'}, {id: 'negative', title: 'NEGATIVE'}, {id: 'neutral', title: 'NEUTRAL'}, {id: 'unrelated', title: 'UNRELATED'}];
+    let dataz=[];
+    
+    if(from&&!to){search=`daily_tonality.key_id='${keyword_id}' AND daily_tonality.date_created>='${from}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
+    else if(!from&&to){search=`daily_tonality.key_id='${keyword_id}' AND daily_tonality.date_created<='${to}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
+    else if(from&&to){search=`daily_tonality.key_id='${keyword_id}' AND daily_tonality.date_created>='${from}' && daily_tonality.date_created<='${to}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
+    else{search=`daily_tonality.key_id='${keyword_id}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
+
+    conn.query(`SELECT SUM(daily_tonality.positive) as positive,SUM(daily_tonality.negative) as negative,SUM(daily_tonality.neutral) as neutral,SUM(daily_tonality.unrelated) as unrelated,key_word,daily_tonality.date_created FROM daily_tonality LEFT JOIN daily_tone ON daily_tonality.key_id=daily_tone.key_id WHERE ${search}`,(err,results)=>{
+        if(err){
+            res.json({code: 0,message:"Something went wrong, please! try again later",filename:''});
+            res.end();
+        }
+        else{
+            if(results.length){
+                for(let i =0; i<results.length; i++){
+                    dataz.push({
+                            date: results[i].date_created.toISOString().slice(0, 10),
+                            keyword:results[i].key_word,  positive:results[i].positive, 
+                            negative:results[i].negative, neutral:results[i].neutral, 
+                            unrelated:results[i].unrelated
+                        });
+                }
+
+                //prepare files for download
+                let dir=__dirname.split('\\');
+                var timestamp = new Date().getTime();
+                let fname=`dailtone_stats_from_${from}_to_${to}_${timestamp}.csv`;
+
+                //let online_path_prefix=`/${dir[1]}/${dir[2]}/${dir[3]}`;
+                let local_path_prefix=`${dir[0]}/${dir[1]}`;
+                let filename = `${local_path_prefix}/downloads/dailtone_stats_from_${from}_to_${to}_${timestamp}.csv`;
+                const csvWriter = createCsvWriter({path: filename,header: hedaz});
+                csvWriter.writeRecords(dataz).then(() => { return true; });
+
+                //send back the response 
+                res.json({code: 1,message:"Succesfuly!",filename:fname});
+                res.end(); 
+            }
+            else{
+                res.json({code: 0,message:"Something went wrong, please! try again later",filename:''});
+                res.end();
+            }
+        }
+    });
+});
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 //////////////////////END OF AUTOMATION////////////////////////////////////////////
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -428,7 +536,7 @@ post_route.post("/add_stats",isAuth,(req,res)=>{
 post_route.post("/single_tweet_stats", isAuth, (req,res)=>{
     const {bot_id,date} = req.body;
     //get tweets of that days
-    conn.query(`SELECT * FROM twitter_stats WHERE owner_id='${bot_id}' AND date_created='${date}' AND post_type='POST OR COMMENT'`,(err,qres)=>{
+    conn.query(`SELECT * FROM twitter_stats WHERE owner_id='${bot_id}' AND date_created='${date}' AND post_type='POST'`,(err,qres)=>{
         if(err) throw err;
         if(qres.length){
             let result="";
@@ -451,7 +559,7 @@ post_route.post("/single_tweet_stats", isAuth, (req,res)=>{
             res.json({code: 1,message:"Succesfuly!",result:result}); res.end();
         }
         else{
-            res.json({code: 0,message:"No result found",result:''}); res.end();
+            res.json({code: 0,result:`<em>No result found</em>`}); res.end();
         }
     });
 });
@@ -473,15 +581,20 @@ post_route.post("/tonality_new_member",isAuth,(req,res)=>{
     //insert new member in the database since is not exist
     conn.query(`INSERT INTO tonality_members SET ?`, {member_id:member_name,createdby:req.cookies.userId,date_created: new Date().toISOString().slice(0,10)},
     (err,q_res)=>{
-        if(err) throw err;
-        if(q_res.affectedRows){
-            let mid=q_res.insertId;
-            res.json({code: 1,message:"Succesfuly!",mid:mid,member_name:mmbr_name}); 
-            res.end();
+        if(err){
+            res.json({code: 0,message:"Something went wrong! try agin later"}); 
+            res.end(); return;
         }
         else{
-            res.json({code: 0,message:"Something went wrong! try agin later"}); 
-            res.end();
+            if(q_res.affectedRows){
+                let mid=q_res.insertId;
+                res.json({code: 1,message:"Succesfuly!",mid:mid,member_name:mmbr_name}); 
+                res.end();
+            }
+            else{
+                res.json({code: 0,message:"Something went wrong! try agin later"}); 
+                res.end();
+            }
         }
     });
 });
@@ -569,41 +682,41 @@ post_route.post("/delete_tonality_item",isAuth,(req,res)=>{
 
 //search data for counted note
 post_route.post("/counted_tone_search",isAuth,(req,res)=>{
-    const {from,to} = req.body; let search;
+    const {from,to,keyword_id} = req.body; let search;
 
-    if(from&&!to){search=`daily_tonality.date_created>='${from}'`;}
-    else if(!from&&to){search=`daily_tonality.date_created<='${to}'`;}
-    else if(from&&to){search=`daily_tonality.date_created>='${from}' && daily_tonality.date_created<='${to}'`;}
-    else{search=`1 ORDER BY daily_tonality.date_created DESC LIMIT 10`;}
+    if(from&&!to){search=`daily_tonality.key_id='${keyword_id}' AND daily_tonality.date_created>='${from}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
+    else if(!from&&to){search=`daily_tonality.key_id='${keyword_id}' AND daily_tonality.date_created<='${to}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
+    else if(from&&to){search=`daily_tonality.key_id='${keyword_id}' AND daily_tonality.date_created>='${from}' && daily_tonality.date_created<='${to}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
+    else{search=`daily_tonality.key_id='${keyword_id}' group by DATE_FORMAT(daily_tonality.date_created, '%c %d %Y')`;}
 
-    conn.query(`SELECT * FROM daily_tonality LEFT JOIN daily_tone ON daily_tonality.key_id=daily_tone.key_id WHERE ${search}`,(err,results)=>{
+    conn.query(`SELECT SUM(daily_tonality.positive) as positive,SUM(daily_tonality.negative) as negative,SUM(daily_tonality.neutral) as neutral,SUM(daily_tonality.unrelated) as unrelated,key_word,daily_tonality.date_created FROM daily_tonality LEFT JOIN daily_tone ON daily_tonality.key_id=daily_tone.key_id WHERE ${search}`,(err,results)=>{
         let tones="";
-
-        if(err) {
+        if(err){
             tones=`<tr id="empty_list" class='tr_item'><td colspan='6' style='text-align:center;'>${err}</td></tr>`;
             res.json({code: 0,message:"Failed!, could not find option from the list",tones:tones});
             res.end(); return;
         }
-
-        if(results.length){
-            for(let i =0; i<results.length; i++){
-                tones+=` <tr class="tr_item" id='tr_item_${results[i].t_id}'>
-                            <td class="date_tr">
-                                <span class="action_span border">
-                                    <i id="delet_btn_${results[i].t_id}" role="button" class="fa fa-trash  fa-1x delet_tr" title="Delete This Item" aria-hidden="true" data-dataid="${results[i].t_id}"></i>
-                                </span> 
-                                ${results[i].date_created}
-                            </td>
-                            <td>${results[i].key_word}</td><td class='positive'>${results[i].positive}</td><td class='negative'>${results[i].negative}</td><td class='neutral'>${results[i].neutral}</td><td class='unrelated'>${results[i].unrelated}</td>
-                        </tr>`;
-            }
-            res.json({code: 1,message:"Succesfuly!, find option from the list",tones:tones});
-            res.end();
-        }
         else{
-            tones=`<tr id="empty_list" class='tr_item'><td colspan='6' style='text-align:center;'>No data found</td></tr>`;
-            res.json({code: 0,message:"Failed!, could not find option from the list",tones:tones});
-            res.end();
+            if(results.length){
+                for(let i =0; i<results.length; i++){
+                    tones+=` <tr class="tr_item" id='tr_item_${results[i].t_id}'>
+                                <td class="date_tr">
+                                    <span class="action_span border">
+                                        <i id="delet_btn_${results[i].t_id}" role="button" class="fa fa-trash  fa-1x delet_tr" title="Delete This Item" aria-hidden="true" data-dataid="${results[i].t_id}"></i>
+                                    </span> 
+                                    ${results[i].date_created.toISOString().slice(0,10)}
+                                </td>
+                                <td>${results[i].key_word}</td><td class='positive'>${results[i].positive}</td><td class='negative'>${results[i].negative}</td><td class='neutral'>${results[i].neutral}</td><td class='unrelated'>${results[i].unrelated}</td>
+                            </tr>`;
+                }
+                res.json({code: 1,message:"Succesfuly!, find option from the list",tones:tones});
+                res.end();
+            }
+            else{
+                tones=`<tr id="empty_list" class='tr_item'><td colspan='6' style='text-align:center;'>No data found</td></tr>`;
+                res.json({code: 0,message:"Failed!, could not find option from the list",tones:tones});
+                res.end();
+            }
         }
     });
 });
@@ -989,7 +1102,6 @@ post_route.post("/tonality_count_youtube", isAuth, (req,res)=>{
 
 post_route.post('/youtube_comment_counter',isAuth,(req,res)=>{
     const {video_title,video_id,mem_id,loadmore,page_name} = req.body;
-    console.log("The value should be here: ",loadmore);
 
     let next_token="",item_id="";
 
@@ -1061,6 +1173,108 @@ post_route.post("/tonality_count_youtube_comment", isAuth, (req,res)=>{
         res.json({code: 0,message:"Failed!, could not find option from the list"});
         res.end();
     }
+});
+
+post_route.post("/download_tonality_csv", isAuth, (req,res)=>{
+    const {media_type,fromdate,todate}=req.body;
+
+    //prepare dataz header and body 
+    let hedaz=[{id: 'date', title: 'DATE'}, {id: 'page', title: 'PAGE NAME'}, {id: 'positive', title: 'POSITIVE'}, {id: 'negative', title: 'NEGATIVE'}, {id: 'neutral', title: 'NEUTRAL'}, {id: 'unrelated', title: 'UNRELATED'}];
+    let dataz=[];
+
+    //check selected media
+    if(media_type==""||media_type=="all"){social=``;}else{social=` AND tonality.media_type='${media_type}'`;}
+
+    if(fromdate&&!todate){search=`tonality.date_created>='${fromdate}'${social}`;}
+    else if(!fromdate&&todate){search=`tonality.date_created<='${todate}'${social}`;}
+    else if(fromdate&&todate){search=`tonality.date_created>='${fromdate}' && tonality.date_created<='${todate}'${social}`;}
+    else if(!fromdate&&!todate){
+        if(media_type==""){social="1";}else{social=` tonality.media_type='${media_type}'`;}
+        search=` ${social} ORDER BY tonality.date_created DESC LIMIT 10`;
+    }
+
+    conn.query(`SELECT * FROM tonality LEFT JOIN social_media ON tonality.page_id = social_media.media_id WHERE ${search}`,(err,results)=>{
+        if(err) {
+            res.json({code: 0,message:"Something went wrong, please! try again later",filename:''});
+            res.end();
+        }
+        else{
+            if(results.length){
+                for(let i =0; i<results.length; i++){
+                    dataz.push({
+                        date: results[i].date_created.toISOString().slice(0, 10),
+                        page:results[i].page_name,  positive:results[i].positive, 
+                        negative:results[i].negative, neutral:results[i].neutral, 
+                        unrelated:results[i].unrelated
+                    });
+                }
+
+                //prepare files for download
+                let dir=__dirname.split('\\');
+                var timestamp = new Date().getTime();
+                let fname=`tonality_stats_${timestamp}.csv`;
+
+                //let online_path_prefix=`/${dir[1]}/${dir[2]}/${dir[3]}`;
+                let local_path_prefix=`${dir[0]}/${dir[1]}`;
+                let filename = `${local_path_prefix}/downloads/tonality_stats_${timestamp}.csv`;
+                const csvWriter = createCsvWriter({path: filename,header: hedaz});
+                csvWriter.writeRecords(dataz).then(() => { return true; });
+
+                //send back the response 
+                res.json({code: 1,message:"Succesfuly!",filename:fname});
+                res.end(); 
+            }
+            else{
+                res.json({code: 0,message:"Something went wrong, please! try again later",filename:''});
+                res.end();
+            }
+        }
+    });
+});
+
+post_route.post("/download_messages_csv", isAuth, (req,res)=>{
+    const {fromdate,todate}=req.body;
+
+    //prepare dataz header and body 
+    let hedaz=[{id: 'date', title: 'DATE'}, {id: 'dm_messages', title: 'DIRECT MESSAGE'}, {id: 'messenger', title: 'MESSANGER'}];
+    let dataz=[];
+
+    if(fromdate&&!todate){search=`datemade>='${from}'`;}
+    else if(!fromdate&&todate){search=`datemade<='${to}'`;}
+    else if(fromdate&&todate){search=`datemade>='${from}' && datemade<='${to}'`;}
+    else{search=`1 ORDER BY datemade DESC LIMIT 10`;}
+
+    conn.query(`SELECT * FROM message_trend WHERE ${search}`,(err,results)=>{
+        if(err) {
+            res.json({code: 0,message:"Something went wrong, please! try again later",filename:''});
+            res.end();
+        }
+        else{
+            if(results.length){
+                //loop
+                for(let i =0; i<results.length; i++){dataz.push({ date: results[i].datemade.toISOString().slice(0, 10), dm_messages:results[i].dm_message,  messenger:results[i].messanger});}
+
+                //prepare files for download
+                let dir=__dirname.split('\\');
+                var timestamp = new Date().getTime();
+                let fname=`messenger_stats_${timestamp}.csv`;
+
+                //let online_path_prefix=`/${dir[1]}/${dir[2]}/${dir[3]}`;
+                let local_path_prefix=`${dir[0]}/${dir[1]}`;
+                let filename = `${local_path_prefix}/downloads/messenger_stats_${timestamp}.csv`;
+                const csvWriter = createCsvWriter({path: filename,header: hedaz});
+                csvWriter.writeRecords(dataz).then(() => { return true; });
+
+                //send back the response 
+                res.json({code: 1,message:"Succesfuly!",filename:fname});
+                res.end(); 
+            }
+            else{
+                res.json({code: 0,message:"Something went wrong, please! try again later",filename:''});
+                res.end();
+            }
+        }
+    });
 });
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ///////////////////////END OF TONALITY ISSUES//////////////////////

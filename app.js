@@ -13,7 +13,6 @@ const tone_counter=require("./controllers/tone_counter");
 const socket= require("socket.io");
 const needle = require('needle');
 const twitt_listener=require("./controllers/twit_listener");
-const influensor_listener=require("./controllers/influencers_tracker");
 
 //SOCKET HANDLER
 const io_rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
@@ -61,7 +60,7 @@ app.use((req, res)=>{res.status(404).sendFile("./views/404.html",{root: __dirnam
 const  io=socket(server);
 
 // send all stream data found from twitter
-function sendData(data){io.sockets.emit("Tweet",data);}
+function sendData(data,keyid){io.sockets.emit("Tweet",{data:data,keyid:keyid});}
 
 // get available stream
 async function getRules(BareToken) {const response = await needle('get', io_rulesURL, { headers: {Authorization: `Bearer ${BareToken}`,},}); return response.body;}
@@ -82,14 +81,14 @@ async function deleteRules(BareToken,previusrule) {
 }
 
 //stream tweet arcording to the new rule
-function streamTweets(BareToken) {
+function streamTweets(BareToken,keyid) {
     const stream = needle.get(io_streamURL, {headers: {Authorization: `Bearer ${BareToken}`,},})
-    stream.on('data', (data) => { try{const json = JSON.parse(data); sendData(json);} catch (error) {} });
+    stream.on('data', (data) => { try{const json = JSON.parse(data); sendData(json,keyid);} catch (error) {} });
     return stream;
 }
 
 //initializing streaming
-var initialize_rules = async (BareToken,newrule)=>{
+var initialize_rules = async (BareToken,newrule,keyid)=>{
     let currentRules;
     try {
         //Get all stream rules
@@ -99,29 +98,35 @@ var initialize_rules = async (BareToken,newrule)=>{
         // Set rules based on array above
         await setRules(BareToken,newrule);
         //then call the stream function
-        streamTweets(BareToken);
+        streamTweets(BareToken,keyid);
     } 
     catch (error) {process.exit(1);}
 }
 
-//GEORGE MLAWA bot (here has to be set the default bare code)
+//bellow is george mlawa bare token
 let bare="AAAAAAAAAAAAAAAAAAAAAPs3UwEAAAAA4A8wV5DdD0sKMqeYYaYyJ00%2Bc3U%3D1xyvw5zev4IRhfQXX17PAh84FtJbJiRXuyDwwZPicpFkQH9WWX";
 
 //check if the socket is connnected
 io.on("connection",(sockets)=>{
+    //establish connection with front end
     io.sockets.emit("handshakes",{message:"<em>You have successfully connected to the server, select key word to stream</em>"});
-    sockets.on("tone",(data)=>{if(tone_counter.savetone(data.contanteid,data.type,data.keyid)){io.sockets.emit("tonefeedback",{content_id:data.contanteid, type:data.type});}});
     
+    //send tone feedback
+    sockets.on("tone",(data)=>{
+        if(tone_counter.savetone(data.contanteid,data.type,data.keyid)){
+            io.sockets.emit("tonefeedback",{content_id:data.contanteid, type:data.type});
+        }
+    });
+    
+    //start streaming on a given keyword
     sockets.on("keyword",(data)=>{
-        initialize_rules(bare,data.new_key);
+        initialize_rules(bare,data.new_key,data.key_id);
         io.sockets.emit("streaming_started",{message:`<em>Streaming on '<strong>${data.new_key}</strong>' keyword has started just wait for the response!</em>`});
     });
 
+    //stop streaming
     sockets.on("stop_streaming", async(data)=>{
         let currentRules = await getRules(bare);
-        if(deleteRules(bare,currentRules)){
-            io.sockets.emit("streaming_stoped",{message:`<em>Streaming on <strong style='color:#ffc107;'>${data.current_stream}</strong> keyword has stoped successfully!</em>`});
-        }
+        if(deleteRules(bare,currentRules)){ io.sockets.emit("streaming_stoped",{message:`<em>Streaming on <strong style='color:#ffc107;'>${data.current_stream}</strong> keyword has stoped successfully!</em>`});}
     });
 });
-//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

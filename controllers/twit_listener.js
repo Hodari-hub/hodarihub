@@ -76,7 +76,7 @@ async function getTweets(BareToken,botid,next_token) {
             owner_id:data.author_id,post_type:ptype,post_id:data.id,key_word:keyword,impression:0,engagement:0,
             detailed_expand:0,followers:0,profile_views:0,retweets:data.public_metrics.retweet_count,
             replies:data.public_metrics.reply_count,likes:data.public_metrics.like_count,text:twitt_text,
-            quotes:data.public_metrics.quote_count,date_created:date,reach:0
+            quotes:data.public_metrics.quote_count,date_created:today,reach:0
           }, 
           function(error, results) { if(error) {console.log(`This error come from twitter listerner lines number 83: ${error}`);} });
         }

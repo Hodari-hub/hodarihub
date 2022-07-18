@@ -336,17 +336,19 @@
                 $.ajax({
                     type:"POST",url:"/delete_tone_counter_keyword", data:{keyword_id:keyword_id[1]},
                     success:function(rs){
+                        console.log(rs)
                         if(rs.code==1){
                             $(`#delete_keyword option[value='${keyword_id}']`).remove();
                             Swal.fire('SUCCESS', `${rs.message}`,'success'); location.reload();
                         }
-                        else{ Swal.fire('Error', `${rs.message}`,'warning'); }
+                        else{ Swal.fire('Error', `${rs.message.sqlMessage}`,'warning'); }
                     }
                 });
             }
         });
     });
 
+    //create auto retweet from a specific user
     $("form#new_rt_listener").submit(function(e){
         e.preventDefault();$("#new_rt_listener_res").fadeIn();
         $("#new_rt_listener_res").html(`<em style='color:#fff;'>processing..</em>`); 
@@ -389,12 +391,11 @@
 
     //get single twitt startistc of the bot
     $("#get_statistic").click(function(){
-        let user_names = $("#user_names").val();
-        let start_date = $("#start_date").val();
+        let user_names = $("#user_names").val(),start_date = $("#start_date").val();
+        $("#twets_result").html(`<em style='color:green;'>Processing...</em>`);
         $.ajax({
-            type:"POST",url:"./single_tweet_stats",data:{bot_id:user_names,date:start_date},
+            type:"POST",url:"/single_tweet_stats",data:{bot_id:user_names,date:start_date},
             success:function(res){
-                console.log(res)
                 $("#twets_result").html(res.result);
             }
         });
@@ -732,7 +733,7 @@ $(".get_twitt_statistic").click(function(){
             let data=res.result,next_token="";
 
             //if something went wrong
-            if(!res.code){ Swal.fire({title: '',text: res.message,icon: 'info',confirmButtonText: 'Ok'}); return;}
+            if(!res.code){Swal.fire({title: '',text: res.message,icon: 'info',confirmButtonText: 'Ok'}); return;}
 
             //check if there is a meta object 
             if("meta" in data){
@@ -751,6 +752,7 @@ $(".get_twitt_statistic").click(function(){
 
             //append values
             for(let i=0; i<data.data.length;i++){
+                console.log(data);
                 if(data.includes.hasOwnProperty('media')){
                     $("#results").append(`<div class="border rounded col-9 col-lg-6 mx-auto row p-1 my-3" id="twt_${data.data[i].id}">
                                 <div class="col-2 profilepic">
@@ -810,6 +812,14 @@ $("#results").on("click",".openUrl", function(e){
     e.preventDefault();
     let url=$(this).data("target");
     window.open(url,"","width=600,height=700");
+});
+
+//view data on the seperate window
+$("table").on("dblclick",".viewTweet", function(){
+    let url=$(this).data("target");
+    let width=5
+    let l=window.innerWidth-width;
+    window.open(url,"customWindow",`width=600,height=700,left=${l},right=10`);
 });
 
 
@@ -1069,13 +1079,16 @@ $("#more_youtube_comment_tone").click(function(){
 $("#influensor_stats").submit(function(e){
     e.preventDefault();
     let form=$(this);
-    $("#data_results").find(".tr_data").remove(); $("#tweets_counters").html(".."); $("#replies_counters").html("...");$("#retweets_counters").html("..");
-    $("#data_results").append(`<tr id="inf_respose"><td class="text-center" colspan="5"><em>Processing, wait..</em></td><td></td></tr>`);
+    let res_tr=`<tr id="inf_respose"><td class="text-center" colspan="4"><em>Processing, wait..</em></td><td></td></tr>`;
+    $("#data_results").find(".tr_data").remove();  $("#tweets_counters").html("..");  $("#replies_counters").html("..."); 
+    $("#retweets_counters").html(".."); $("#data_results").find("#inf_respose").remove(); $("#data_results").append(res_tr);
     $.post({
         type:"POST",url:"/influencers_tracker", data:form.serialize(),
         success:function(res){
-            $("#tweets_counters").html(res.tweet_num); $("#replies_counters").html(res.replie_num); $("#retweets_counters").html(res.rt_num);
-            $("#data_results").find("#inf_respose").remove(); $("#data_results").append(res.data);
+            $("#tweets_counters").html(res.tweet_num);  $("#replies_counters").html(res.replie_num); 
+            $("#retweets_counters").html(res.rt_num); $("#data_results").find("#inf_respose").remove(); 
+            $("#data_results").append(res.data);
+            if(res.code==0){$("#data_results").find("#inf_respose").fadeOut(5000);}
         }
     })
 });
@@ -1100,7 +1113,83 @@ $("#download_influencers_csv").click(function(){
                     }
                 });
             }
-            else{Swal.fire({title:'',text: rs.message,icon:'info',confirmButtonText:'Ok'});}
+            else{Swal.fire({title:'',text: res.message,icon:'info',confirmButtonText:'Ok'});}
+        }
+    });
+});
+
+$("#download_dailtone_csv").click(function(){
+    let from,to,keyword_id;
+    from=$("#from").val();to=$("#to").val();keyword_id=$("#keyword_id").val();
+    $.ajax({
+        type:"POST", url:"/get_dailtonality_csv", data:{from:from,to:to,keyword_id:keyword_id},
+        success:function(res){
+            if(res.code){
+                Swal.fire({ title: '',html: `Your File is ready for download`, icon: 'success', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Download Now' })
+                .then((result) => { 
+                    if (result.isConfirmed) { window.location=`/downloads/${res.filename.split(".")[0]}`;} 
+                    else{
+                        $.ajax({    
+                            type:"POST",url:"/delete_downloads",data:{filename:res.filename},
+                            success:function(dt){
+                                if(!dt.code){Swal.fire({title:'',html: dt.message,icon:'warning',confirmButtonText:'Ok'});}
+                            }
+                        });
+                    }
+                });
+            }
+            else{Swal.fire({title:'',text: res.message,icon:'info',confirmButtonText:'Ok'});}
+        }
+    });
+});
+
+$("#download_tonality_csv").click(function(){
+    let media_selected,from,to;
+    media_selected=$("#media_selected").val(),from=$("#from").val(),$("#to").val();
+    $.ajax({
+        type:"POST", url:"/download_tonality_csv", data:{media_type:media_selected,fromdate:from,todate:to},
+        success:function(res){
+            if(res.code){
+                Swal.fire({ title: '',html: `Your File is ready for download`, icon: 'success', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Download Now' })
+                .then((result) => { 
+                    if (result.isConfirmed) { window.location=`/downloads/${res.filename.split(".")[0]}`;} 
+                    else{
+                        $.ajax({
+                            type:"POST",url:"/delete_downloads",data:{filename:res.filename},
+                            success:function(dt){
+                                if(!dt.code){Swal.fire({title:'',html: dt.message,icon:'warning',confirmButtonText:'Ok'});}
+                            }
+                        });
+                    }
+                });
+            }
+            else{Swal.fire({title:'',text: res.message,icon:'info',confirmButtonText:'Ok'});}
+        }
+    });
+});
+
+//create messages csv and download them
+$("#download_messages_csv").click(function(){
+    let from,to;
+    from=$("#from").val(),$("#to").val();
+    $.ajax({
+        type:"POST", url:"/download_messages_csv", data:{fromdate:from,todate:to},
+        success:function(res){
+            if(res.code){
+                Swal.fire({ title: '',html: `Your File is ready for download`, icon: 'success', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#e64033', confirmButtonText: 'Download Now' })
+                .then((result) => { 
+                    if (result.isConfirmed) { window.location=`/downloads/${res.filename.split(".")[0]}`;} 
+                    else{
+                        $.ajax({
+                            type:"POST",url:"/delete_downloads",data:{filename:res.filename},
+                            success:function(dt){
+                                if(!dt.code){Swal.fire({title:'',html: dt.message,icon:'warning',confirmButtonText:'Ok'});}
+                            }
+                        });
+                    }
+                });
+            }
+            else{Swal.fire({title:'',text: res.message,icon:'info',confirmButtonText:'Ok'});}
         }
     });
 });

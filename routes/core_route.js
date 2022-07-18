@@ -678,7 +678,7 @@ route.get("/dashboard",isAuth,(req,res)=>{
             if(results.length){
                 for(let i =0; i<results.length; i++){
                     let t_id=results[i].t_id,page_name=results[i].page_name, positive=results[i].positive, negative=results[i].negative,
-                    neautral=results[i].neautral, unrelated=results[i].unrelated,date_created=results[i].date_created.toISOString().slice(0, 10);
+                    neautral=results[i].neutral, unrelated=results[i].unrelated,date_created=results[i].date_created.toISOString().slice(0, 10);
                     if(i==0){ isSelected="selected";}else{ isSelected="";}
                     tones+=`<tr class="tr_item" id='tr_item_${t_id}'>
                                 <td class="date_tr">
@@ -808,7 +808,9 @@ route.get("/dashboard",isAuth,(req,res)=>{
 
     route.get("/downloads/:filename",isAuth,(req,res)=>{
         let dir=__dirname.split('\\');
-        res.download(`${dir[0]}/${dir[1]}/downloads/${req.params.filename}.csv`);
+        //url prefix is for the localhost
+        let prefix_url=`${dir[0]}/${dir[1]}/`;
+        res.download(`${prefix_url}downloads/${req.params.filename}.csv`);
     });
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ///////////////////////////////END OF TONALITY COUNTER///////////////////////////////////////////////////

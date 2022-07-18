@@ -4,35 +4,44 @@
     <%- include("./partials/sideMenu.ejs"); %>
     <!-- Main content div -->
       <div class='content-wrapper'>
-        <div class="container p-3 row col-8 mx-auto">
-            <form class="input-group col-8 mx-auto" id="influensor_stats">
-                <div class="col-12 col-sm-12 col-md-3 my-1"><input type="text" name="pageid" id="pageid" class="form-control" placeholder="Page Id"></div>
-                <div class="col-12 col-sm-12 col-md-3 my-1"><input type="date" class="form-control" id="from" name="from"></div>
-                <div class="col-12 col-sm-12 col-md-3 my-1"><input type="date" class="form-control" id="to" name="to"></div>
-                <div class="col-12 col-sm-12 col-md-3 my-1"><button class="btn btn-outline-secondary form-control" type="submit">GET DATA</button></div>
-            </form>
-        </div>
+
+        <!-- Top form html -->
         <div class="row m-0 mx-auto">
-            <div class="row col-9 mx-auto">
-                <div class="col-9 py-4 mx-auto">
-                    <div class="table-responsive">
-                        <table class="table m-0">
-                            <thead><tr><th>DATE</th><th>CAPTION</th><th>RETWEET</th><th>REPLIES</th><th>LIKES</th><th>QUOTES</th></tr></thead>
-                            <tbody id="data_results">
-                                <%- locals.tone %>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="col-12 col-sm-12 col-md-9 row p-4">
+                <form class="input-group col-8 mx-auto" id="influensor_stats">
+                    <div class="col-12 col-sm-12 col-md-3 my-1"><input type="text" name="pageid" id="pageid" class="form-control" placeholder="Page Id"></div>
+                    <div class="col-12 col-sm-12 col-md-3 my-1"><input type="date" class="form-control" id="from" name="from"></div>
+                    <div class="col-12 col-sm-12 col-md-3 my-1"><input type="date" class="form-control" id="to" name="to"></div>
+                    <div class="col-12 col-sm-12 col-md-3 my-1"><button class="btn btn-outline-secondary form-control" type="submit">GET DATA</button></div>
+                </form>
+            </div>
+            <div class="col-12 col-sm-12 col-md-3"></div>
+        </div>
+
+        <!-- Response Tab -->
+        <div class="row m-0 mx-auto">
+
+            <div class="col-12 col-sm-12 col-md-9 mx-auto">
+                <div class="table-responsive">
+                    <table class="table m-0 table-striped" style="border:1px solid #6c757d;">
+                        <thead><tr><th>PUBLISHED</th><th>CAPTION</th><th>RETWEET</th><th>REPLIES</th><th>QUOTES</th></tr></thead>
+                        <tbody id="data_results"> <tr id="inf_respose"><td class="text-center" colspan="4"><em>No data requested yet!</em></td><td></td></tr> </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-12 col-sm-12 col-md-3">
                 <ul class="list-group sticky-top my-4">
                     <li class="list-group-item">Tweets: <span id="tweets_counters">0</span></li>
                     <li class="list-group-item">Replies: <span id="replies_counters">0</span></li>
                     <li class="list-group-item">Retweets: <span id="retweets_counters">0</span></li>
                 </ul>
             </div>
-            <div class="col-12 col-sm-12 col-md-2 mx-auto my-2"><button class="btn btn-primary" id="download_influencers_csv"><i class="fa fa-download" aria-hidden="true"></i>DOWNLOAD CSV</button></div>
+
+            <div class="col-12 col-sm-12 col-md-12 row mx-auto my-4">
+                <div class="col-12 col-sm-12 col-md-9 mx-auto text-center"><button class="btn btn-primary" id="download_influencers_csv"><i class="fa fa-download" aria-hidden="true"></i>DOWNLOAD CSV</button></div>
+                <div class="col-12 col-sm-12 col-md-3"></div>
+            </div>
+
         </div>
       </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js" integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

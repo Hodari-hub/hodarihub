@@ -39,7 +39,7 @@ async function deleteRules(BareToken,previusrule) {
   return response.body
 }
 
-function streamTweets(APIKey,APISecrete,Atoken,Tsecrete,BareToken) {
+function streamTweets(APIKey,APISecrete,Atoken,Tsecrete,BareToken,newrule) {
   const stream = needle.get(streamURL, {headers: {Authorization: `Bearer ${BareToken}`,},})
   stream.on('data', (data) => {
     try {
@@ -47,10 +47,12 @@ function streamTweets(APIKey,APISecrete,Atoken,Tsecrete,BareToken) {
         const json = JSON.parse(data);
         let isRt= json.data.text.substring(0,2).toString()=="RT";
         let isReply= "in_reply_to_user_id" in json.data;
+        let isKeyword=json.data.text.toLowerCase().includes(newrule.toLowerCase());
         //this function is only for tweet
-        if(!isReply && !isRt){ retweet(json.data.id,APIKey,APISecrete,Atoken,Tsecrete); }
+        if(!isReply && !isRt){ if(isKeyword){ retweet(json.data.id,APIKey,APISecrete,Atoken,Tsecrete); }  }
       }
-    } catch (error) { console.log(`This error is on number 50 on vs code: ${error}`); }
+    } 
+    catch (error) { console.log(`Erro from line 55 rt_automation_controller.js from controllers folder ${error}`); }
   });
 
   return stream;
@@ -75,12 +77,8 @@ var start_the_process=()=>{
 
   //fetch data from the databse and make a request
   conn.query(`SELECT * FROM key_bystander LEFT JOIN bots ON key_bystander.bot_id=bots.bot_id WHERE 1`,async (err,resp)=>{
-    if(err) throw err;
-    if(resp.length){
-      for(let i =0; i<resp.length; i++){
-        await initialize_rules(resp[i].api_key,resp[i].apisecret,resp[i].access_token,resp[i].access_secret,resp[i].baretoken,resp[i].keyword);
-      }
-    }
+    if(err){console.log(`Erro from line 80 rt_automation_controller.js from controllers folder ${err}`);}
+    else{if(resp.length){ for(let i =0; i<resp.length; i++){ await initialize_rules(resp[i].api_key,resp[i].apisecret,resp[i].access_token,resp[i].access_secret,resp[i].baretoken,resp[i].keyword);}}}
   });
 }
 
